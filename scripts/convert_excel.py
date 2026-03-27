@@ -2,7 +2,7 @@
 """
 CS Wind Dashboard - Excel to HTML Auto Converter
 GitHub Actions에서 자동 실행되는 스크립트
-Raw Data_Power BI.xlsx → index.html 자동 생성
+Raw Data_Global Equipment-Based Productivity.xlsx → index.html 자동 생성
 """
 
 import pandas as pd
@@ -19,10 +19,10 @@ def get_val(df_fac, type_, cat):
 def convert_excel_to_rawdata(excel_path):
     """엑셀 파일을 JS rawData 구조로 변환"""
     print(f"📂 엑셀 파일 로드: {excel_path}")
-    
+
     df = pd.read_excel(excel_path, sheet_name='Raw(1)')
     df["Q'ty"] = pd.to_numeric(df["Q'ty"], errors='coerce').fillna(0)
-    
+
     print(f"  - 총 행 수: {len(df)}")
     print(f"  - 법인 수: {df['Factory'].nunique()}")
     print(f"  - 주차 범위: WK{df['Week'].min():02d} ~ WK{df['Week'].max():02d}")
@@ -69,12 +69,12 @@ def convert_excel_to_rawdata(excel_path):
 def build_index_html(raw_data, template_path, output_path):
     """템플릿 HTML에 rawData 삽입하여 index.html 생성"""
     print(f"📄 HTML 템플릿 로드: {template_path}")
-    
+
     with open(template_path, 'r', encoding='utf-8') as f:
         template = f.read()
 
     js_data = "const rawData = " + json.dumps(raw_data, ensure_ascii=False, indent=2) + ";"
-    
+
     if '%%RAWDATA_PLACEHOLDER%%' not in template:
         print("❌ 템플릿에 플레이스홀더 없음!")
         sys.exit(1)
@@ -90,9 +90,9 @@ def validate(raw_data):
     """최신 주차 데이터 검증 출력"""
     year = list(raw_data.keys())[0]
     weeks = sorted(raw_data[year].keys())
-    latest_week = weeks[-1]
-    
+
     # 실제 데이터가 있는 최신 주차 찾기
+    latest_week = weeks[0]
     for w in reversed(weeks):
         has_data = any(
             raw_data[year][w]['production'][f]['bending'] > 0
@@ -103,9 +103,9 @@ def validate(raw_data):
             break
 
     print(f"\n📊 최신 실적 주차: {latest_week}")
-    prod = raw_data[year][latest_week]['production']
+    prod  = raw_data[year][latest_week]['production']
     equip = raw_data[year][latest_week]['equipment']
-    
+
     factories_order = ['VN #1', 'VN #2', 'TW', 'CN', 'TR #1', 'TR #2', 'AM', 'PT On', 'PT Off']
     print(f"  {'법인':<10} {'장비':>4}  {'생산':>5}  {'효율':>7}")
     print(f"  {'-'*35}")
@@ -113,19 +113,20 @@ def validate(raw_data):
         if fac in prod:
             eq = equip[fac]['bending']
             pr = prod[fac]['bending']
-            eff = pr/eq if eq > 0 else 0
+            eff = pr / eq if eq > 0 else 0
             print(f"  {fac:<10} {eq:>4.0f}대  {pr:>5.0f}  {eff:>6.2f}")
 
 if __name__ == "__main__":
-    # 경로 설정
-    base_dir = Path(__file__).parent.parent  # 저장소 루트
-    excel_path = base_dir / "data" / "Raw Data_Power BI.xlsx"
+    # ✅ 경로 설정 (루트 기준, 파일명 수정됨)
+    base_dir     = Path(__file__).parent.parent          # 저장소 루트
+    excel_path   = base_dir / "Raw Data_Global Equipment-Based Productivity.xlsx"
     template_path = base_dir / "dashboard_template.html"
-    output_path = base_dir / "index.html"
+    output_path  = base_dir / "index.html"
 
     # 파일 존재 확인
     if not excel_path.exists():
         print(f"❌ 엑셀 파일 없음: {excel_path}")
+        print(f"   저장소 루트에 'Raw Data_Global Equipment-Based Productivity.xlsx' 파일이 있는지 확인하세요.")
         sys.exit(1)
     if not template_path.exists():
         print(f"❌ 템플릿 파일 없음: {template_path}")
@@ -135,5 +136,5 @@ if __name__ == "__main__":
     raw_data = convert_excel_to_rawdata(excel_path)
     build_index_html(raw_data, template_path, output_path)
     validate(raw_data)
-    
+
     print("\n🎉 완료! index.html이 최신 데이터로 업데이트되었습니다.")
