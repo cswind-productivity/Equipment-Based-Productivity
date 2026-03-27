@@ -1,0 +1,43 @@
+name: 📊 Dashboard Auto Update
+
+on:
+  push:
+    paths:
+      - 'data/Raw Data_Global Equipment-Based Productivity.xlsx'   # 엑셀 파일 변경 시 자동 트리거
+  workflow_dispatch:                     # 수동 실행 버튼도 활성화
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # 1. 저장소 체크아웃
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Python 환경 설정
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. 필요 라이브러리 설치
+      - name: 📦 Install Dependencies
+        run: |
+          pip install pandas openpyxl
+
+      # 4. 엑셀 → index.html 변환
+      - name: 🔄 Convert Excel to Dashboard
+        run: |
+          python scripts/convert_excel.py
+
+      # 5. 변경된 index.html 커밋 & 푸시
+      - name: 💾 Commit & Push index.html
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --staged --quiet || git commit -m "🤖 Auto update dashboard - $(date +'%Y-%m-%d %H:%M UTC')"
+          git push
