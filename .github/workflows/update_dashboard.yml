@@ -3,8 +3,8 @@ name: 📊 Dashboard Auto Update
 on:
   push:
     paths:
-      - 'data/Raw Data_Global Equipment-Based Productivity.xlsx'   # 엑셀 파일 변경 시 자동 트리거
-  workflow_dispatch:                     # 수동 실행 버튼도 활성화
+      - 'Raw Data_Global Equipment-Based Productivity.xlsx'  # 엑셀 파일 변경 시 자동 트리거
+  workflow_dispatch:                                          # 수동 실행 버튼도 활성화
 
 jobs:
   build-and-deploy:
