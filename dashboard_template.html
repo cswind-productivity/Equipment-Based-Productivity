@@ -17,6 +17,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(180deg, #eef3f8 0%, #dde7f1 100%);
             padding: 24px;
+            padding-bottom: 56px;
             color: #1f2937;
         }
 
@@ -237,16 +238,17 @@
             align-items: center;
             gap: 8px;
             padding: 8px 12px;
-            background: white;
-            border-radius: 6px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #d3dde7;
+            transition: all 0.25s ease;
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
         }
 
         .checkbox-item:hover {
-            border-color: #4a90e2;
-            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+            border-color: #2f5d84;
+            box-shadow: 0 6px 16px rgba(47, 93, 132, 0.14);
         }
 
         .checkbox-item input[type="checkbox"] {
@@ -264,8 +266,9 @@
         }
 
         .checkbox-item.checked {
-            border-color: #1e3c72;
-            background: #e8f4f8;
+            border-color: #274c77;
+            background: linear-gradient(180deg, #eef5fb 0%, #e6eff8 100%);
+            box-shadow: 0 8px 18px rgba(39, 76, 119, 0.10);
         }
 
         .trend-charts-grid {
@@ -302,6 +305,19 @@
             font-size: 11px;
             color: #666;
             font-weight: 400;
+        }
+
+        .page-signature {
+            position: fixed;
+            right: 18px;
+            bottom: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: rgba(71, 85, 105, 0.42);
+            user-select: none;
+            pointer-events: none;
+            z-index: 30;
         }
 
         @media (max-width: 1400px) {
@@ -483,6 +499,8 @@
         </div>
     </div>
 
+    <div class="page-signature">Made by SJ Lee</div>
+
     <script>
         // Register Chart.js Datalabels plugin for bar chart labels
         if (typeof ChartDataLabels !== 'undefined') {
@@ -496,15 +514,15 @@
         const factories = ['VN #1', 'VN #2', 'TW', 'CN', 'TR #1', 'TR #2', 'AM', 'PT On', 'PT Off'];
         const factoriesWithTotal = [...factories, 'CS Total'];
         const factoryColors = {
-            'VN #1': '#355C7D',
-            'VN #2': '#4F6D8A',
-            'TW': '#6C7A89',
-            'CN': '#2F5D84',
-            'TR #1': '#7B8794',
-            'TR #2': '#5D6D7E',
-            'AM': '#1F3F5B',
-            'PT On': '#52796F',
-            'PT Off': '#8A9AA9',
+            'VN #1': '#1D4ED8',
+            'VN #2': '#60A5FA',
+            'TW': '#0F766E',
+            'CN': '#B91C1C',
+            'TR #1': '#C2410C',
+            'TR #2': '#FB923C',
+            'AM': '#7C3AED',
+            'PT On': '#0891B2',
+            'PT Off': '#4B5563',
             'CS Total': '#0F172A'
         };
 
@@ -826,9 +844,11 @@
                         data: data,
                         backgroundColor: colors,
                         borderColor: '#ffffff',
-                        borderWidth: 1.2,
-                        borderRadius: 6,
+                        borderWidth: 1.1,
+                        borderRadius: 8,
                         borderSkipped: false,
+                        hoverBorderColor: '#0F172A',
+                        hoverBorderWidth: 1.2,
                         maxBarThickness: 36,
                         categoryPercentage: 0.74,
                         barPercentage: 0.86
@@ -869,10 +889,8 @@
                             weight: 'bold',
                             size: 11
                         },
-                        color: function(context) {
-                            const value = context.dataset.data[context.dataIndex];
-                            const max = Math.max(...context.dataset.data, 0);
-                            return value >= max * 0.85 ? '#ffffff' : '#1e3c72';
+                        color: function() {
+                            return '#0F172A';
                         },
                         padding: {
                             top: 4,
