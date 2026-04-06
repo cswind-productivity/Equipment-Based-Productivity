@@ -522,6 +522,35 @@
             });
         }
 
+        function getSortedWeeks(year) {
+            return Object.keys(rawData[year]).sort((a, b) => {
+                const numA = parseInt(a.replace('WK', ''));
+                const numB = parseInt(b.replace('WK', ''));
+                return numA - numB;
+            });
+        }
+
+        function getLatestWeekWithData(year) {
+            const weeks = getSortedWeeks(year);
+            for (let i = weeks.length - 1; i >= 0; i--) {
+                const week = weeks[i];
+                const weekData = rawData[year]?.[week];
+                if (!weekData || !weekData.production) continue;
+
+                const hasProduction = Object.values(weekData.production).some(prod => {
+                    if (!prod) return false;
+                    return (prod.bending || 0) > 0 ||
+                           (prod.lw || 0) > 0 ||
+                           (prod.cw || 0) > 0 ||
+                           (prod.btgt || 0) > 0 ||
+                           (prod.wtgt || 0) > 0;
+                });
+
+                if (hasProduction) return week;
+            }
+            return weeks[weeks.length - 1] || weeks[0];
+        }
+
         function initSelectors() {
             const yearSelect = document.getElementById('yearSelect');
             const weekSelect = document.getElementById('weekSelect');
@@ -537,25 +566,14 @@
             const currentYear = years[0];
             yearSelect.value = currentYear;
             updateWeekSelector(currentYear);
-            
-            const weeks = Object.keys(rawData[currentYear]).sort((a, b) => {
-                const numA = parseInt(a.replace('WK', ''));
-                const numB = parseInt(b.replace('WK', ''));
-                return numA - numB;
-            });
-            const defaultWeek = weeks.includes('WK04') ? 'WK04' : weeks[0];
-            weekSelect.value = defaultWeek;
+            weekSelect.value = getLatestWeekWithData(currentYear);
         }
 
         function updateWeekSelector(year) {
             const weekSelect = document.getElementById('weekSelect');
             weekSelect.innerHTML = '';
             
-            const weeks = Object.keys(rawData[year]).sort((a, b) => {
-                const numA = parseInt(a.replace('WK', ''));
-                const numB = parseInt(b.replace('WK', ''));
-                return numA - numB;
-            });
+            const weeks = getSortedWeeks(year);
             weeks.forEach(week => {
                 const option = document.createElement('option');
                 option.value = week;
@@ -744,6 +762,8 @@
             const colors = labels.map(label => 
                 label === 'CS Total' ? '#2c3e50' : '#4a90e2'
             );
+            const maxDataValue = Math.max(...data, average || 0, 0);
+            const suggestedMax = maxDataValue > 0 ? Math.ceil(maxDataValue * 1.15) : 10;
 
             
             // Update average-line with actual average value
@@ -769,18 +789,30 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
+                    layout: {
+                        padding: {
+                            top: 28,
+                            right: 6,
+                            left: 6,
+                            bottom: 0
+                        }
+                    },
                     plugins: {
                         datalabels: {
                         display: true,
                         anchor: 'end',
                         align: function(context) {
-                            // 값이 차트 최대값의 90% 이상이면 'end' (막대 안쪽)
-                            // 그 외에는 'top' (막대 위)
                             const value = context.dataset.data[context.dataIndex];
-                            const max = Math.max(...context.dataset.data);
+                            const max = Math.max(...context.dataset.data, 0);
                             return value >= max * 0.85 ? 'end' : 'top';
                         },
-                        offset: 4,
+                        offset: function(context) {
+                            const value = context.dataset.data[context.dataIndex];
+                            const max = Math.max(...context.dataset.data, 0);
+                            return value >= max * 0.85 ? 2 : 6;
+                        },
+                        clamp: true,
+                        clip: false,
                         formatter: (value) => {
                             if (value === null || value === undefined || value === 0) return '';
                             return formatNumber(value);
@@ -790,9 +822,8 @@
                             size: 11
                         },
                         color: function(context) {
-                            // 막대 안쪽이면 흰색, 밖이면 파란색
                             const value = context.dataset.data[context.dataIndex];
-                            const max = Math.max(...context.dataset.data);
+                            const max = Math.max(...context.dataset.data, 0);
                             return value >= max * 0.85 ? '#ffffff' : '#1e3c72';
                         },
                         padding: {
@@ -810,6 +841,8 @@
                     scales: {
                         y: {
                             beginAtZero: true,
+                            suggestedMax: suggestedMax,
+                            grace: '8%',
                             grid: { color: '#e0e0e0' },
                             ticks: {
                                 callback: function(value) {
@@ -1070,7 +1103,9 @@
         document.getElementById('yearSelect').addEventListener('change', (e) => {
             const year = e.target.value;
             updateWeekSelector(year);
-            const week = document.getElementById('weekSelect').value;
+            const weekSelect = document.getElementById('weekSelect');
+            weekSelect.value = getLatestWeekWithData(year);
+            const week = weekSelect.value;
             updateTables(year, week);
             updateTrendCharts(year, week);
         });
