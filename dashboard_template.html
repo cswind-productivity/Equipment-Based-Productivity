@@ -15,41 +15,68 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            color: #333;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 28%),
+                radial-gradient(circle at top right, rgba(96, 165, 250, 0.18), transparent 24%),
+                linear-gradient(135deg, #071a2f 0%, #0f2747 40%, #143a63 100%);
+            padding: 24px;
+            color: #1f2937;
         }
 
         .container {
-            max-width: 1800px;
+            max-width: 1820px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 24px;
+            box-shadow: 0 28px 90px rgba(2, 12, 27, 0.28);
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
         .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0b2545 0%, #123d69 52%, #1d6fa3 100%);
             color: white;
-            padding: 30px;
+            padding: 34px 42px 28px;
             text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0.10), transparent 32%, rgba(255,255,255,0.06));
+            pointer-events: none;
+        }
+
+        .header-inner {
+            position: relative;
+            z-index: 1;
         }
 
         .header h1 {
-            font-size: 32px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            margin-bottom: 10px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(226, 232, 240, 0.92);
         }
 
         .controls {
-            background: #ffd93d;
-            padding: 20px 40px;
+            background: linear-gradient(135deg, #f8fbff 0%, #eef6ff 55%, #f5fbff 100%);
+            border-top: 1px solid rgba(148, 163, 184, 0.22);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+            padding: 18px 34px;
             display: flex;
-            gap: 30px;
+            gap: 18px;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
             flex-wrap: wrap;
         }
 
@@ -57,46 +84,73 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .control-group label {
-            font-weight: 600;
-            color: #333;
-            font-size: 16px;
+            font-weight: 700;
+            color: #0f2942;
+            font-size: 15px;
         }
 
         .control-group select {
-            padding: 10px 20px;
-            border: 2px solid #1e3c72;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            background: white;
+            min-width: 120px;
+            padding: 10px 18px;
+            border: 1px solid #bfd5ea;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            background: #ffffff;
+            color: #0f2942;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 24px rgba(15, 41, 66, 0.07);
         }
 
-        .control-group select:hover {
-            border-color: #2a5298;
-            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.2);
+        .control-group select:hover,
+        .control-group select:focus {
+            border-color: #1d6fa3;
+            box-shadow: 0 10px 24px rgba(29, 111, 163, 0.18);
+            outline: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(59, 130, 246, 0.12));
+            border: 1px solid rgba(14, 116, 144, 0.18);
+            color: #0f2942;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+
+        .status-badge strong {
+            color: #0b5cab;
+            font-weight: 800;
         }
 
         .content {
-            padding: 30px;
+            padding: 28px 30px 34px;
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.92) 0%, #ffffff 16%);
         }
 
         .section {
-            margin-bottom: 40px;
+            margin-bottom: 34px;
         }
 
         .section-title {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f2942 0%, #174f7a 58%, #1d6fa3 100%);
             color: white;
             padding: 15px 20px;
-            border-radius: 8px;
+            border-radius: 14px;
             font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            box-shadow: 0 12px 28px rgba(15, 41, 66, 0.12);
         }
 
         table {
@@ -105,34 +159,35 @@
         }
 
         th {
-            background: #4a5f8f;
+            background: linear-gradient(135deg, #27496d 0%, #1d5f91 100%);
             color: white;
             padding: 12px;
             text-align: center;
-            font-weight: 600;
-            font-size: 14px;
-            border: 1px solid #3a4f7f;
+            font-weight: 700;
+            font-size: 13px;
+            border: 1px solid #20486d;
         }
 
         td {
             padding: 10px 12px;
             text-align: center;
-            border: 1px solid #ddd;
+            border: 1px solid #d9e3ec;
             font-size: 13px;
+            color: #1f2937;
         }
 
         tr:nth-child(even) {
-            background: #f8f9fa;
+            background: #f8fbfe;
         }
 
         tr:hover {
-            background: #e8f4f8;
-            transition: background 0.3s;
+            background: #eef7ff;
+            transition: background 0.2s ease;
         }
 
         .total-row {
-            background: #ffd93d !important;
-            font-weight: 700;
+            background: linear-gradient(135deg, #fff7cc 0%, #ffe082 100%) !important;
+            font-weight: 800;
         }
 
         .factory-col {
@@ -152,17 +207,18 @@
 
         .chart-container {
             position: relative;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            padding: 20px 20px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 14px 32px rgba(15, 41, 66, 0.08);
         }
 
         .chart-title {
             text-align: center;
-            font-weight: 600;
-            color: #1e3c72;
-            margin-bottom: 15px;
+            font-weight: 700;
+            color: #0f2942;
+            margin-bottom: 16px;
             font-size: 14px;
         }
 
@@ -171,11 +227,12 @@
         }
 
         .trend-controls {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8fbff 0%, #eef6ff 100%);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 16px;
             margin-bottom: 20px;
-            border: 2px solid #e0e0e0;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
         }
 
         .trend-controls h3 {
@@ -285,7 +342,10 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>CS WIND Global Equipment-Based Productivity Dashboard</h1>
+            <div class="header-inner">
+                <h1>CS WIND Global Equipment-Based Productivity Dashboard</h1>
+                <p class="header-subtitle">Global Equipment / Performance / Efficiency Dashboard · 기본 진입 주차는 한국 기준 전주를 우선 적용하고, 해당 주차 데이터가 없으면 최신 실적 주차로 자동 보정됩니다.</p>
+            </div>
         </div>
 
         <div class="controls">
@@ -297,6 +357,7 @@
                 <label for="weekSelect">Week:</label>
                 <select id="weekSelect"></select>
             </div>
+            <div id="defaultWeekHint" class="status-badge">기본 주차 계산 중...</div>
         </div>
 
         <div class="content">
@@ -530,25 +591,101 @@
             });
         }
 
+        function getWeekNumber(weekKey) {
+            return parseInt(String(weekKey || '').replace('WK', ''), 10) || 0;
+        }
+
+        function hasProductionData(year, week) {
+            const weekData = rawData[year]?.[week];
+            if (!weekData || !weekData.production) return false;
+
+            return Object.values(weekData.production).some(prod => {
+                if (!prod) return false;
+                return (prod.bending || 0) > 0 ||
+                       (prod.lw || 0) > 0 ||
+                       (prod.cw || 0) > 0 ||
+                       (prod.btgt || 0) > 0 ||
+                       (prod.wtgt || 0) > 0;
+            });
+        }
+
         function getLatestWeekWithData(year) {
             const weeks = getSortedWeeks(year);
             for (let i = weeks.length - 1; i >= 0; i--) {
-                const week = weeks[i];
-                const weekData = rawData[year]?.[week];
-                if (!weekData || !weekData.production) continue;
-
-                const hasProduction = Object.values(weekData.production).some(prod => {
-                    if (!prod) return false;
-                    return (prod.bending || 0) > 0 ||
-                           (prod.lw || 0) > 0 ||
-                           (prod.cw || 0) > 0 ||
-                           (prod.btgt || 0) > 0 ||
-                           (prod.wtgt || 0) > 0;
-                });
-
-                if (hasProduction) return week;
+                if (hasProductionData(year, weeks[i])) return weeks[i];
             }
             return weeks[weeks.length - 1] || weeks[0];
+        }
+
+        function getKoreaNow() {
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Asia/Seoul',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            const parts = formatter.formatToParts(new Date());
+            const get = (type) => parts.find(part => part.type === type)?.value || '00';
+            return new Date(Date.UTC(
+                Number(get('year')),
+                Number(get('month')) - 1,
+                Number(get('day')),
+                Number(get('hour')),
+                Number(get('minute')),
+                Number(get('second'))
+            ));
+        }
+
+        function getISOWeekInfo(date) {
+            const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const isoYear = d.getUTCFullYear();
+            const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return { year: isoYear, week: weekNo };
+        }
+
+        function getKoreaReferenceWeek(year) {
+            const koreaNow = getKoreaNow();
+            koreaNow.setUTCDate(koreaNow.getUTCDate() - 7);
+            const isoInfo = getISOWeekInfo(koreaNow);
+            const koreaYearKey = `${isoInfo.year}Y`;
+            if (koreaYearKey !== year) return null;
+            return `WK${String(isoInfo.week).padStart(2, '0')}`;
+        }
+
+        function getDefaultWeekForYear(year) {
+            const latestWeek = getLatestWeekWithData(year);
+            const referenceWeek = getKoreaReferenceWeek(year);
+            if (!referenceWeek) return latestWeek;
+
+            const weeks = getSortedWeeks(year);
+            const targetWeekNum = getWeekNumber(referenceWeek);
+            const candidateWeeks = weeks.filter(week => getWeekNumber(week) <= targetWeekNum && hasProductionData(year, week));
+            return candidateWeeks[candidateWeeks.length - 1] || latestWeek;
+        }
+
+        function updateDefaultWeekHint(year, selectedWeek) {
+            const hint = document.getElementById('defaultWeekHint');
+            if (!hint) return;
+
+            const latestWeek = getLatestWeekWithData(year);
+            const referenceWeek = getKoreaReferenceWeek(year);
+            const appliedWeek = selectedWeek || getDefaultWeekForYear(year);
+
+            if (referenceWeek) {
+                const adjustedText = appliedWeek !== referenceWeek
+                    ? `한국 기준 전주 ${referenceWeek} → 데이터 기준 ${appliedWeek} 자동 보정`
+                    : `한국 기준 전주 ${referenceWeek} 자동 적용`;
+                hint.innerHTML = `<strong>Default View</strong> ${year} / ${appliedWeek} · ${adjustedText}`;
+            } else {
+                hint.innerHTML = `<strong>Default View</strong> ${year} / ${appliedWeek} · 해당 연도는 최신 실적 주차(${latestWeek})를 기본 표시`;
+            }
         }
 
         function initSelectors() {
@@ -566,7 +703,9 @@
             const currentYear = years[0];
             yearSelect.value = currentYear;
             updateWeekSelector(currentYear);
-            weekSelect.value = getLatestWeekWithData(currentYear);
+            const defaultWeek = getDefaultWeekForYear(currentYear);
+            weekSelect.value = defaultWeek;
+            updateDefaultWeekHint(currentYear, defaultWeek);
         }
 
         function updateWeekSelector(year) {
@@ -760,10 +899,10 @@
             }
 
             const colors = labels.map(label => 
-                label === 'CS Total' ? '#2c3e50' : '#4a90e2'
+                label === 'CS Total' ? '#0f172a' : (factoryColors[label] || '#4a90e2')
             );
             const maxDataValue = Math.max(...data, average || 0, 0);
-            const suggestedMax = maxDataValue > 0 ? Math.ceil(maxDataValue * 1.15) : 10;
+            const suggestedMax = maxDataValue > 0 ? Math.ceil(maxDataValue * 1.20) : 10;
 
             
             // Update average-line with actual average value
@@ -782,8 +921,11 @@
                     datasets: [{
                         data: data,
                         backgroundColor: colors,
-                        borderColor: colors,
-                        borderWidth: 1
+                        borderColor: '#ffffff',
+                        borderWidth: 1.5,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        maxBarThickness: 34
                     }]
                 },
                 options: {
@@ -791,10 +933,10 @@
                     maintainAspectRatio: true,
                     layout: {
                         padding: {
-                            top: 28,
-                            right: 6,
-                            left: 6,
-                            bottom: 0
+                            top: 34,
+                            right: 10,
+                            left: 10,
+                            bottom: 4
                         }
                     },
                     plugins: {
@@ -842,16 +984,29 @@
                         y: {
                             beginAtZero: true,
                             suggestedMax: suggestedMax,
-                            grace: '8%',
-                            grid: { color: '#e0e0e0' },
+                            grace: '10%',
+                            grid: { color: '#dbe7f3' },
                             ticks: {
+                                color: '#47637d',
+                                padding: 6,
                                 callback: function(value) {
                                     return formatNumber(value);
                                 }
                             }
                         },
                         x: {
-                            grid: { display: false }
+                            offset: true,
+                            grid: { display: false },
+                            ticks: {
+                                color: '#334155',
+                                padding: 8,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                font: {
+                                    size: 11,
+                                    weight: '600'
+                                }
+                            }
                         }
                     }
                 },
@@ -864,7 +1019,7 @@
                         const y = yScale.getPixelForValue(average);
                         
                         ctx.save();
-                        ctx.strokeStyle = 'rgb(255, 99, 132)';
+                        ctx.strokeStyle = '#f97316';
                         ctx.lineWidth = 2;
                         ctx.setLineDash([5, 5]);
                         ctx.beginPath();
@@ -1104,15 +1259,17 @@
             const year = e.target.value;
             updateWeekSelector(year);
             const weekSelect = document.getElementById('weekSelect');
-            weekSelect.value = getLatestWeekWithData(year);
-            const week = weekSelect.value;
-            updateTables(year, week);
-            updateTrendCharts(year, week);
+            const defaultWeek = getDefaultWeekForYear(year);
+            weekSelect.value = defaultWeek;
+            updateDefaultWeekHint(year, defaultWeek);
+            updateTables(year, defaultWeek);
+            updateTrendCharts(year, defaultWeek);
         });
 
         document.getElementById('weekSelect').addEventListener('change', (e) => {
             const year = document.getElementById('yearSelect').value;
             const week = e.target.value;
+            updateDefaultWeekHint(year, week);
             updateTables(year, week);
             updateTrendCharts(year, week);
         });
@@ -1121,8 +1278,9 @@
         initSelectors();
         const initialYear = document.getElementById('yearSelect').value;
         const initialWeek = document.getElementById('weekSelect').value;
+        updateDefaultWeekHint(initialYear, initialWeek);
         updateTables(initialYear, initialWeek);
         updateTrendCharts(initialYear, initialWeek);
     </script>
 </body>
-</html>                                                                                                                                                            
+</html>
