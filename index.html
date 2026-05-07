@@ -349,11 +349,18 @@
 
         <div class="controls">
             <div class="control-group">
+                <label for="modeSelect">View:</label>
+                <select id="modeSelect">
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="control-group">
                 <label for="yearSelect">Year:</label>
                 <select id="yearSelect"></select>
             </div>
             <div class="control-group">
-                <label for="weekSelect">Week:</label>
+                <label id="periodLabel" for="weekSelect">Week:</label>
                 <select id="weekSelect"></select>
             </div>
         </div>
@@ -456,7 +463,7 @@
             </div>
 
             <div class="section trend-section">
-                <div class="section-title">Trend of Equipment-Based Productivity (최근 10주)</div>
+                <div class="section-title">Trend of Equipment-Based Productivity (최근 10개 기간)</div>
                 
                 <div class="trend-controls">
                     <h3>📊 공장 선택 (Factory Selection)</h3>
@@ -9679,7 +9686,7 @@ const monthlyData = {
       }
     }
   }
-};;;;;
+};
 
         let charts = {};
         let trendCharts = {};
@@ -9755,11 +9762,26 @@ const monthlyData = {
             });
         }
 
+        function getActiveData() {
+            const mode = document.getElementById('modeSelect')?.value || 'weekly';
+            return mode === 'monthly' ? monthlyData : rawData;
+        }
+
         function getSortedWeeks(year) {
-            return Object.keys(rawData[year]).sort((a, b) => {
-                const numA = parseInt(a.replace('WK', ''));
-                const numB = parseInt(b.replace('WK', ''));
-                return numA - numB;
+            const activeData = getActiveData();
+            const periods = Object.keys(activeData[year] || {});
+            return periods.sort((a, b) => {
+                if (a.startsWith('WK') && b.startsWith('WK')) {
+                    return parseInt(a.replace('WK', '')) - parseInt(b.replace('WK', ''));
+                }
+                const monthOrder = {Jan:1, Feb:2, Mar:3, Apr:4, May:5, Jun:6, Jul:7, Aug:8, Sep:9, Oct:10, Nov:11, Dec:12};
+                const getMonthKey = (x) => {
+                    const parts = x.split('-');
+                    const yearNum = parseInt(parts[0]) || 0;
+                    const monthNum = monthOrder[parts[1]] || 0;
+                    return yearNum * 100 + monthNum;
+                };
+                return getMonthKey(a) - getMonthKey(b);
             });
         }
 
@@ -9767,7 +9789,8 @@ const monthlyData = {
             const weeks = getSortedWeeks(year);
             for (let i = weeks.length - 1; i >= 0; i--) {
                 const week = weeks[i];
-                const weekData = rawData[year]?.[week];
+                const activeData = getActiveData();
+                const weekData = activeData[year]?.[week];
                 if (!weekData || !weekData.production) continue;
 
                 const hasProduction = Object.values(weekData.production).some(prod => {
@@ -9788,7 +9811,7 @@ const monthlyData = {
             const yearSelect = document.getElementById('yearSelect');
             const weekSelect = document.getElementById('weekSelect');
             
-            const years = Object.keys(rawData).sort((a, b) => b - a);
+            const years = Object.keys(getActiveData()).sort((a, b) => b.localeCompare(a));
             years.forEach(year => {
                 const option = document.createElement('option');
                 option.value = year;
@@ -9804,6 +9827,8 @@ const monthlyData = {
 
         function updateWeekSelector(year) {
             const weekSelect = document.getElementById('weekSelect');
+            const periodLabel = document.getElementById('periodLabel');
+            if (periodLabel) periodLabel.textContent = (document.getElementById('modeSelect')?.value === 'monthly') ? 'Month:' : 'Week:';
             weekSelect.innerHTML = '';
             
             const weeks = getSortedWeeks(year);
@@ -9822,7 +9847,7 @@ const monthlyData = {
         }
 
         function updateTables(year, week) {
-            const data = rawData[year]?.[week];
+            const data = getActiveData()[year]?.[week];
             if (!data) return;
 
             const equipmentBody = document.getElementById('equipmentTableBody');
@@ -10241,21 +10266,12 @@ const monthlyData = {
         }
 
         function updateTrendCharts(year, week) {
-            // week는 "WK06" 형식
-            const currentWeekNum = parseInt(week.replace('WK', ''));
-            const weeks = [];
-            const weekLabels = [];
-            
-            for (let i = 9; i >= 0; i--) {
-                const wNum = currentWeekNum - i;
-                if (wNum > 0) {
-                    const wKey = `WK${wNum.toString().padStart(2, '0')}`;
-                    if (rawData[year]?.[wKey]) {
-                        weeks.push(wKey);
-                        weekLabels.push(wKey);
-                    }
-                }
-            }
+            const activeData = getActiveData();
+            const allPeriods = getSortedWeeks(year);
+            const currentIndex = allPeriods.indexOf(week);
+            const startIndex = Math.max(0, currentIndex - 9);
+            const weeks = allPeriods.slice(startIndex, currentIndex + 1);
+            const weekLabels = weeks;
 
             const metrics = ['bending', 'lw', 'cw', 'btgt', 'wtpb', 'wtpl'];
             const chartIds = ['trendBending', 'trendLW', 'trendCW', 'trendBTGT', 'trendWTPB', 'trendWTPL'];
@@ -10265,7 +10281,7 @@ const monthlyData = {
                     .filter(factory => selectedFactories.has(factory))
                     .map(factory => {
                         const data = weeks.map(w => {
-                            const weekData = rawData[year]?.[w];
+                            const weekData = getActiveData()[year]?.[w];
                             if (!weekData) return null;
                             
                             let efficiency = 0;
@@ -10351,6 +10367,16 @@ const monthlyData = {
                 createTrendChart(chartIds[idx], weekLabels, datasets);
             });
         }
+
+        document.getElementById('modeSelect').addEventListener('change', () => {
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '';
+            initSelectors();
+            const year = yearSelect.value;
+            const week = document.getElementById('weekSelect').value;
+            updateTables(year, week);
+            updateTrendCharts(year, week);
+        });
 
         document.getElementById('yearSelect').addEventListener('change', (e) => {
             const year = e.target.value;
