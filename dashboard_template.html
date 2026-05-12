@@ -3,66 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CS WIND Global Equipment-Based Productivity Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<title>Dashboard</title>
+
 <style>
-body {
+body{
     font-family: Arial, sans-serif;
-    background:#eef2f7;
     margin:0;
     padding:20px;
+    background:#ffffff;
 }
 
-.dashboard {
-    max-width:1200px;
+.container{
+    width:100%;
+    max-width:1600px;
     margin:auto;
 }
 
-.header {
-    background:linear-gradient(135deg,#163a70,#2d5cff);
-    color:white;
-    padding:20px;
-    border-radius:20px;
+h2{
+    margin-top:40px;
     margin-bottom:20px;
 }
 
-.header h1 {
-    margin:0;
-    font-size:24px;
-}
-
-.controls {
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-    margin-top:16px;
-}
-
-.control-group {
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.15);
-    border-radius:12px;
-    padding:10px;
-}
-
-.control-group label {
-    display:block;
-    font-size:12px;
-    margin-bottom:6px;
-}
-
-.control-group select {
+table{
     width:100%;
+    border-collapse:collapse;
+    margin-bottom:40px;
+}
+
+th{
+    background:#1f4e78;
+    color:white;
     padding:10px;
-    border-radius:10px;
-    border:none;
+    border:1px solid #d9d9d9;
 }
 
-.summary {
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-    margin-bottom:20px;
+td{
+    padding:8px;
+    border:1px solid #d9d9d9;
+    text-align:center;
 }
 
+.section{
+    margin-bottom:50px;
+}
+
+.chart-placeholder{
+    height:400px;
+    border:1px solid #d9d9d9;
+    background:#fafafa;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#999999;
+    font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Q1 Equipment-Based Productivity Summary</h2>
+
+<div class="section">
+
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>CS Total</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Bending / Machine</td>
+<td>41.80</td>
+</tr>
+
+<tr>
+<td>L/W / Machine</td>
+<td>24.42</td>
+</tr>
+
+<tr>
+<td>C/W / Machine</td>
+<td>18.16</td>
+</tr>
+
+<tr>
+<td>BT GT / Growing Line</td>
+<td>1.45</td>
+</tr>
+
+<tr>
+<td>WT GT / Paint Booth</td>
+<td>2.11</td>
+</tr>
+
+<tr>
+<td>WT GT / Paint Line</td>
+<td>4.33</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+<div class="chart-placeholder">
+Dashboard Graph Area
+</div>
+
+</div>
+
+</body>
 </html>
