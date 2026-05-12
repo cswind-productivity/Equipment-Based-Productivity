@@ -1,547 +1,74 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS WIND Global Equipment-Based Productivity Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(180deg, #eef3f8 0%, #dde7f1 100%);
-            padding: 24px;
-            padding-bottom: 56px;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1820px;
-            margin: 0 auto;
-            background: #ffffff;
-            border: 1px solid #d6e0ea;
-            border-radius: 22px;
-            box-shadow: 0 18px 46px rgba(15, 23, 42, 0.10);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #16324f 0%, #214d76 100%);
-            color: white;
-            padding: 28px 36px 24px;
-            text-align: center;
-            position: relative;
-        }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent 40%, rgba(255,255,255,0.04));
-            pointer-events: none;
-        }
-
-        .header-inner {
-            position: relative;
-            z-index: 1;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: 0.2px;
-            margin-bottom: 0;
-        }
-
-        .header-subtitle {
-            display: none;
-        }
-
-        .controls {
-            background: linear-gradient(180deg, #f8fbfe 0%, #f2f6fa 100%);
-            border-top: 1px solid #d6e0ea;
-            border-bottom: 1px solid #d6e0ea;
-            padding: 16px 28px;
-            display: flex;
-            gap: 18px;
-            align-items: center;
-            justify-content: flex-start;
-            flex-wrap: wrap;
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .control-group label {
-            font-weight: 700;
-            color: #0f2942;
-            font-size: 15px;
-        }
-
-        .control-group select {
-            min-width: 120px;
-            padding: 10px 16px;
-            border: 1px solid #b9c8d8;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 700;
-            background: #ffffff;
-            color: #16324f;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: none;
-        }
-
-        .control-group select:hover,
-        .control-group select:focus {
-            border-color: #486581;
-            box-shadow: 0 0 0 3px rgba(72, 101, 129, 0.12);
-            outline: none;
-        }
-
-
-        .period-toggle {
-            display: flex;
-            gap: 6px;
-            background: #e8f0f8;
-            border: 1px solid #b9c8d8;
-            border-radius: 12px;
-            padding: 4px;
-        }
-
-        .period-toggle button {
-            border: none;
-            background: transparent;
-            padding: 8px 16px;
-            border-radius: 9px;
-            font-weight: 800;
-            color: #16324f;
-            cursor: pointer;
-        }
-
-        .period-toggle button.active {
-            background: #16324f;
-            color: white;
-        }
-
-        .status-badge {
-            display: none;
-        }
-
-        .status-badge strong {
-            color: inherit;
-            font-weight: 800;
-        }
-
-        .content {
-            padding: 28px 30px 34px;
-            background: linear-gradient(180deg, rgba(248, 250, 252, 0.92) 0%, #ffffff 16%);
-        }
-
-        .section {
-            margin-bottom: 34px;
-        }
-
-        .section-title {
-            background: linear-gradient(135deg, #1f3f5b 0%, #2f5d84 100%);
-            color: white;
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 18px;
-            box-shadow: 0 8px 18px rgba(31, 63, 91, 0.10);
-        }
-
-        table {
-            width: 100%;
-            table-layout: fixed;
-        }
-
-        th {
-            background: linear-gradient(135deg, #2b4f73 0%, #3e678f 100%);
-            color: white;
-            padding: 12px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 13px;
-            border: 1px solid #294a69;
-        }
-
-        td {
-            padding: 10px 12px;
-            text-align: center;
-            border: 1px solid #d9e3ec;
-            font-size: 13px;
-            color: #1f2937;
-        }
-
-        tr:nth-child(even) {
-            background: #f8fbfe;
-        }
-
-        tr:hover {
-            background: #eef7ff;
-            transition: background 0.2s ease;
-        }
-
-        .total-row {
-            background: linear-gradient(135deg, #fff7cc 0%, #ffe082 100%) !important;
-            font-weight: 800;
-        }
-
-        .factory-col {
-            font-weight: bold;
-            text-align: left;
-            width: 120px !important;
-            min-width: 120px !important;
-            max-width: 120px !important;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .chart-container {
-            position: relative;
-            background: linear-gradient(180deg, #ffffff 0%, #f7fafc 100%);
-            padding: 20px 20px 18px;
-            border-radius: 16px;
-            border: 1px solid #d9e3ec;
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-        }
-
-        .chart-title {
-            text-align: center;
-            font-weight: 700;
-            color: #0f2942;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        .trend-section {
-            margin-top: 50px;
-        }
-
-        .trend-controls {
-            background: linear-gradient(180deg, #f8fbfe 0%, #f2f6fa 100%);
-            padding: 20px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-            border: 1px solid #d9e3ec;
-            box-shadow: none;
-        }
-
-        .trend-controls h3 {
-            color: #1e3c72;
-            font-size: 16px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: #ffffff;
-            border-radius: 10px;
-            border: 1px solid #d3dde7;
-            transition: all 0.25s ease;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-        }
-
-        .checkbox-item:hover {
-            border-color: #2f5d84;
-            box-shadow: 0 6px 16px rgba(47, 93, 132, 0.14);
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #1e3c72;
-        }
-
-        .checkbox-item label {
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            user-select: none;
-        }
-
-        .checkbox-item.checked {
-            border-color: #274c77;
-            background: linear-gradient(180deg, #eef5fb 0%, #e6eff8 100%);
-            box-shadow: 0 8px 18px rgba(39, 76, 119, 0.10);
-        }
-
-        .trend-charts-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .average-line {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 11px;
-            color: #dc3545;
-            font-weight: 600;
-        }
-
-
-        .unit-label {
-            position: absolute;
-            top: 28px;
-            right: 15px;
-            font-size: 11px;
-            color: #666;
-            font-weight: 400;
-        }
-
-
-        .trend-unit-label {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 11px;
-            color: #666;
-            font-weight: 400;
-        }
-
-        .page-signature {
-            position: fixed;
-            right: 18px;
-            bottom: 12px;
-            font-size: 12px;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            color: rgba(71, 85, 105, 0.42);
-            user-select: none;
-            pointer-events: none;
-            z-index: 30;
-        }
-
-        @media (max-width: 1400px) {
-            .charts-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .checkbox-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 900px) {
-            .charts-grid, .trend-charts-grid {
-                grid-template-columns: 1fr;
-            }
-            .checkbox-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CS WIND Global Equipment-Based Productivity Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root { --bg:#f4f7fb; --card:#ffffff; --ink:#172033; --muted:#667085; --line:#d8e0ea; --blue:#2563eb; --green:#16a34a; --orange:#f59e0b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Arial, 'Malgun Gothic', sans-serif; background:var(--bg); color:var(--ink); }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 24px; }
+    .hero { background: linear-gradient(135deg, #102a43, #1d4ed8); color:white; border-radius: 18px; padding: 24px 28px; box-shadow:0 12px 28px rgba(16,42,67,.18); }
+    h1 { margin:0; font-size: 28px; letter-spacing:-.3px; }
+    .subtitle { margin-top:8px; color:#dbeafe; font-size:14px; }
+    .controls { display:grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap:14px; margin-top:18px; }
+    .control { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:10px 12px; }
+    .control label { display:block; font-size:12px; color:#dbeafe; margin-bottom:6px; }
+    select { width:100%; padding:9px 10px; border:1px solid #cbd5e1; border-radius:10px; background:white; color:#111827; font-size:14px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:18px; margin-top:20px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:0 8px 18px rgba(15,23,42,.06); }
+    .card h2 { margin:0 0 14px; font-size:18px; }
+    .kpis { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-top:20px; }
+    .kpi { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:0 8px 18px rgba(15,23,42,.06); }
+    .kpi .label { color:var(--muted); font-size:13px; }
+    .kpi .value { margin-top:7px; font-size:27px; font-weight:700; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { border-bottom:1px solid #eef2f7; padding:9px 10px; text-align:right; white-space:nowrap; }
+    th:first-child, td:first-child { text-align:left; font-weight:600; }
+    th { background:#f8fafc; color:#344054; font-size:12px; }
+    tbody tr:hover { background:#f8fbff; }
+    .two { display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+    .chartBox { height:330px; }
+    .foot { text-align:center; color:var(--muted); font-size:12px; padding:22px 0 6px; }
+    @media(max-width: 1000px){ .controls,.kpis,.two{grid-template-columns:1fr;} .wrap{padding:14px;} }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-inner">
-                <h1>CS WIND Global Equipment-Based Productivity Dashboard</h1>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="control-group">
-                <label>View:</label>
-                <div class="period-toggle">
-                    <button id="weeklyBtn" class="active" type="button">Weekly</button>
-                    <button id="monthlyBtn" type="button">Monthly</button>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label for="yearSelect">Year:</label>
-                <select id="yearSelect"></select>
-            </div>
-
-            <div class="control-group">
-                <label id="periodLabel" for="weekSelect">Week:</label>
-                <select id="weekSelect"></select>
-            </div>
-        </div>
-
-        <div class="content">
-            <div class="section">
-                <div class="section-title">1. 공장별 장비 현황 (Equipment Inventory)</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Factory</th>
-                            <th>Roll Bending Machine</th>
-                            <th>L/W Machine</th>
-                            <th>C/W Machine</th>
-                            <th>Growing Line</th>
-                            <th>Paint Booth</th>
-                            <th>Paint Line</th>
-                            <th>Remark</th>
-                        </tr>
-                    </thead>
-                    <tbody id="equipmentTableBody"></tbody>
-                </table>
-            </div>
-
-            <div class="section">
-                <div class="section-title">2. 공장별 생산 실적 (Production Performance)</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Factory</th>
-                            <th>Bending</th>
-                            <th>L/W</th>
-                            <th>C/W</th>
-                            <th>BT GT</th>
-                            <th>WT GT</th>
-                            <th>WT GT</th>
-                            <th>Remark</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productionTableBody"></tbody>
-                </table>
-            </div>
-
-            <div class="section">
-                <div class="section-title">3. 장비당 생산 효율성 (Production per Equipment)</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Factory</th>
-                            <th>Bending / Machine</th>
-                            <th>L/W Machine</th>
-                            <th>C/W / Machine</th>
-                            <th>BT GT / Growing Line</th>
-                            <th>WT GT / Paint Booth</th>
-                            <th>WT GT / Paint Line</th>
-                            <th>Remark</th>
-                        </tr>
-                    </thead>
-                    <tbody id="efficiencyTableBody"></tbody>
-                </table>
-
-                <div class="charts-grid">
-                    <div class="chart-container">
-                        <div class="chart-title">Bending / Machine</div>
-                        <canvas id="chartBending"></canvas>
-                        <div class="average-line">----- Avg.</div>
-                        <div class="unit-label">(Can / Machine)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">L/W / Machine</div>
-                        <canvas id="chartLW"></canvas>
-                        <div class="average-line">----- Avg.</div>
-                        <div class="unit-label">(Can / Machine)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">C/W / Machine</div>
-                        <canvas id="chartCW"></canvas>
-                        <div class="average-line">----- Avg.</div>
-                        <div class="unit-label">(CS Joint / Machine)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">BT GT / Growing Line</div>
-                        <canvas id="chartBTGT"></canvas>
-                        <div class="average-line">----- Avg.</div>
-                        <div class="unit-label">(BT Sec. / Line)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">WT GT / Paint Booth</div>
-                        <canvas id="chartWTPB"></canvas>
-                        <div class="average-line">----- Avg.</div>
-                        <div class="unit-label">(WT Sec. / Booth)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">WT GT / Paint Line</div>
-                        <canvas id="chartWTPL"></canvas>
-                        <div class="average-line">----- Avg.</div>
-                        <div class="unit-label">(WT Sec. / Line)</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section trend-section">
-                <div class="section-title">Trend of Equipment-Based Productivity (최근 10주)</div>
-                
-                <div class="trend-controls">
-                    <h3>📊 공장 선택 (Factory Selection)</h3>
-                    <div class="checkbox-grid" id="factoryCheckboxes"></div>
-                </div>
-
-                <div class="trend-charts-grid">
-                    <div class="chart-container">
-                        <div class="chart-title">Bending / Machine</div>
-                        <canvas id="trendBending"></canvas>
-                        <div class="trend-unit-label">(Can / Machine)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">L/W / Machine</div>
-                        <canvas id="trendLW"></canvas>
-                        <div class="trend-unit-label">(Can / Machine)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">C/W / Machine</div>
-                        <canvas id="trendCW"></canvas>
-                        <div class="trend-unit-label">(CS Joint / Machine)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">BT GT / Growing Line</div>
-                        <canvas id="trendBTGT"></canvas>
-                        <div class="trend-unit-label">(BT Sec. / Line)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">WT GT / Paint Booth</div>
-                        <canvas id="trendWTPB"></canvas>
-                        <div class="trend-unit-label">(WT Sec. / Booth)</div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">WT GT / Paint Line</div>
-                        <canvas id="trendWTPL"></canvas>
-                        <div class="trend-unit-label">(WT Sec. / Line)</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="wrap">
+    <div class="hero">
+      <h1>CS WIND Global Equipment-Based Productivity Dashboard</h1>
+      <div class="subtitle">Weekly / Monthly view generated automatically from Excel Raw(1) data</div>
+      <div class="controls">
+        <div class="control"><label>View Mode</label><select id="modeSelect"><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+        <div class="control"><label>Year</label><select id="yearSelect"></select></div>
+        <div class="control"><label>Period</label><select id="periodSelect"></select></div>
+        <div class="control"><label>Factory for Trend</label><select id="factorySelect"></select></div>
+      </div>
     </div>
 
-    <div class="page-signature">Made by SJ Lee</div>
+    <div class="kpis">
+      <div class="kpi"><div class="label">Selected Period</div><div class="value" id="kpiPeriod">-</div></div>
+      <div class="kpi"><div class="label">Total Equipment</div><div class="value" id="kpiEquipment">-</div></div>
+      <div class="kpi"><div class="label">Total Production</div><div class="value" id="kpiProduction">-</div></div>
+      <div class="kpi"><div class="label">Avg. Productivity</div><div class="value" id="kpiProductivity">-</div></div>
+    </div>
 
-    <script>
-        // Register Chart.js Datalabels plugin for bar chart labels
-        if (typeof ChartDataLabels !== 'undefined') {
-            Chart.register(ChartDataLabels);
-        }
+    <div class="grid">
+      <div class="card"><h2>1. 공장별 장비 현황 (Equipment Inventory)</h2><div id="equipmentTable"></div></div>
+      <div class="card"><h2>2. 공장별 생산 실적 (Production Performance)</h2><div id="productionTable"></div></div>
+      <div class="card"><h2>3. 장비당 생산 효율성 (Production per Equipment)</h2><div id="efficiencyTable"></div></div>
+      <div class="two">
+        <div class="card"><h2>Factory Productivity Comparison</h2><div class="chartBox"><canvas id="barChart"></canvas></div></div>
+        <div class="card"><h2>Trend of Equipment-Based Productivity</h2><div class="chartBox"><canvas id="trendChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="foot">Made by SJ Lee · Monthly view added for CS WIND Productivity Dashboard</div>
+  </div>
 
-        const rawData = {
+<script>
+const rawData = {
   "2026Y": {
     "WK01": {
       "equipment": {
@@ -3158,32 +2685,32 @@
       },
       "production": {
         "VN #1": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 216.0,
+          "lw": 216.0,
+          "cw": 256.0,
+          "btgt": 25.0,
+          "wtgt": 23.0
         },
         "VN #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 185.0,
+          "lw": 183.0,
+          "cw": 196.0,
+          "btgt": 20.0,
+          "wtgt": 24.0
         },
         "TW": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 25.0,
+          "lw": 24.0,
+          "cw": 27.1,
+          "btgt": 2.0,
+          "wtgt": 1.0
         },
         "CN": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 206.0,
+          "lw": 206.0,
+          "cw": 243.0,
+          "btgt": 34.0,
+          "wtgt": 34.0
         },
         "TR #1": {
           "bending": 0.0,
@@ -3193,32 +2720,32 @@
           "wtgt": 0.0
         },
         "TR #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 181.0,
+          "lw": 184.0,
+          "cw": 224.0,
+          "btgt": 26.0,
+          "wtgt": 25.0
         },
         "AM": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 593.0,
+          "lw": 605.0,
+          "cw": 513.0,
+          "btgt": 70.0,
+          "wtgt": 73.0
         },
         "PT On": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 138.0,
+          "lw": 140.0,
+          "cw": 161.0,
+          "btgt": 16.0,
+          "wtgt": 16.0
         },
         "PT Off": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 108.0,
+          "lw": 113.0,
+          "cw": 82.0,
+          "btgt": 7.0,
+          "wtgt": 5.0
         }
       }
     },
@@ -8023,92 +7550,92 @@ const monthlyData = {
     "2026-Jan": {
       "equipment": {
         "VN #1": {
-          "bending": 30.0,
-          "lw": 50.0,
-          "cw": 50.0,
-          "growing": 75.0,
-          "paintBooth": 50.0,
-          "paintLine": 25.0
-        },
-        "VN #2": {
-          "bending": 15.0,
-          "lw": 30.0,
-          "cw": 44.0,
-          "growing": 70.0,
+          "bending": 24.0,
+          "lw": 40.0,
+          "cw": 40.0,
+          "growing": 60.0,
           "paintBooth": 40.0,
           "paintLine": 20.0
         },
+        "VN #2": {
+          "bending": 12.0,
+          "lw": 24.0,
+          "cw": 35.2,
+          "growing": 56.0,
+          "paintBooth": 32.0,
+          "paintLine": 16.0
+        },
         "TW": {
-          "bending": 10.0,
-          "lw": 10.0,
-          "cw": 15.0,
-          "growing": 25.0,
-          "paintBooth": 15.0,
-          "paintLine": 10.0
+          "bending": 8.0,
+          "lw": 8.0,
+          "cw": 12.0,
+          "growing": 20.0,
+          "paintBooth": 12.0,
+          "paintLine": 8.0
         },
         "CN": {
-          "bending": 20.0,
-          "lw": 50.0,
-          "cw": 60.0,
-          "growing": 100.0,
-          "paintBooth": 110.0,
-          "paintLine": 30.0
+          "bending": 16.0,
+          "lw": 40.0,
+          "cw": 48.0,
+          "growing": 80.0,
+          "paintBooth": 88.0,
+          "paintLine": 24.0
         },
         "TR #1": {
-          "bending": 10.0,
-          "lw": 15.0,
-          "cw": 20.0,
-          "growing": 15.0,
-          "paintBooth": 15.0,
-          "paintLine": 10.0
+          "bending": 8.0,
+          "lw": 12.0,
+          "cw": 16.0,
+          "growing": 12.0,
+          "paintBooth": 12.0,
+          "paintLine": 8.0
         },
         "TR #2": {
-          "bending": 15.0,
-          "lw": 20.0,
-          "cw": 30.0,
-          "growing": 30.0,
-          "paintBooth": 20.0,
-          "paintLine": 10.0
+          "bending": 12.0,
+          "lw": 16.0,
+          "cw": 24.0,
+          "growing": 24.0,
+          "paintBooth": 16.0,
+          "paintLine": 8.0
         },
         "AM": {
-          "bending": 30.0,
-          "lw": 55.0,
-          "cw": 75.0,
-          "growing": 150.0,
-          "paintBooth": 80.0,
-          "paintLine": 40.0
+          "bending": 24.0,
+          "lw": 44.0,
+          "cw": 60.0,
+          "growing": 120.0,
+          "paintBooth": 64.0,
+          "paintLine": 32.0
         },
         "PT On": {
-          "bending": 15.0,
-          "lw": 20.0,
-          "cw": 32.5,
-          "growing": 30.0,
-          "paintBooth": 20.0,
-          "paintLine": 20.0
+          "bending": 12.0,
+          "lw": 16.0,
+          "cw": 26.0,
+          "growing": 24.0,
+          "paintBooth": 16.0,
+          "paintLine": 16.0
         },
         "PT Off": {
-          "bending": 20.0,
-          "lw": 35.0,
-          "cw": 62.5,
-          "growing": 55.0,
-          "paintBooth": 30.0,
-          "paintLine": 20.0
+          "bending": 16.0,
+          "lw": 28.0,
+          "cw": 50.0,
+          "growing": 44.0,
+          "paintBooth": 24.0,
+          "paintLine": 16.0
         }
       },
       "production": {
         "VN #1": {
-          "bending": 1023.4,
-          "lw": 1031.8,
-          "cw": 1168.3999999999999,
-          "btgt": 108.0,
-          "wtgt": 110.0
+          "bending": 806.4,
+          "lw": 814.6,
+          "cw": 924.3,
+          "btgt": 85.0,
+          "wtgt": 91.0
         },
         "VN #2": {
-          "bending": 812.0,
-          "lw": 838.0,
-          "cw": 918.0,
-          "btgt": 107.0,
-          "wtgt": 112.0
+          "bending": 656.0,
+          "lw": 680.0,
+          "cw": 753.4,
+          "btgt": 84.0,
+          "wtgt": 90.0
         },
         "TW": {
           "bending": 0.0,
@@ -8118,11 +7645,11 @@ const monthlyData = {
           "wtgt": 0.0
         },
         "CN": {
-          "bending": 1428.0,
-          "lw": 1428.0,
-          "cw": 1554.0,
-          "btgt": 153.0,
-          "wtgt": 144.0
+          "bending": 1213.0,
+          "lw": 1213.0,
+          "cw": 1307.0,
+          "btgt": 129.0,
+          "wtgt": 120.0
         },
         "TR #1": {
           "bending": 0.0,
@@ -8132,11 +7659,11 @@ const monthlyData = {
           "wtgt": 0.0
         },
         "TR #2": {
-          "bending": 653.0,
-          "lw": 654.0,
-          "cw": 758.0,
-          "btgt": 88.0,
-          "wtgt": 102.0
+          "bending": 535.0,
+          "lw": 530.0,
+          "cw": 600.0,
+          "btgt": 73.0,
+          "wtgt": 82.0
         },
         "AM": {
           "bending": 2079.0,
@@ -8305,147 +7832,6 @@ const monthlyData = {
     "2026-Mar": {
       "equipment": {
         "VN #1": {
-          "bending": 24.0,
-          "lw": 40.0,
-          "cw": 40.0,
-          "growing": 60.0,
-          "paintBooth": 40.0,
-          "paintLine": 20.0
-        },
-        "VN #2": {
-          "bending": 12.0,
-          "lw": 24.0,
-          "cw": 35.2,
-          "growing": 56.0,
-          "paintBooth": 32.0,
-          "paintLine": 16.0
-        },
-        "TW": {
-          "bending": 8.0,
-          "lw": 8.0,
-          "cw": 12.0,
-          "growing": 20.0,
-          "paintBooth": 12.0,
-          "paintLine": 8.0
-        },
-        "CN": {
-          "bending": 16.0,
-          "lw": 40.0,
-          "cw": 48.0,
-          "growing": 80.0,
-          "paintBooth": 88.0,
-          "paintLine": 24.0
-        },
-        "TR #1": {
-          "bending": 8.0,
-          "lw": 12.0,
-          "cw": 16.0,
-          "growing": 12.0,
-          "paintBooth": 12.0,
-          "paintLine": 8.0
-        },
-        "TR #2": {
-          "bending": 12.0,
-          "lw": 16.0,
-          "cw": 24.0,
-          "growing": 24.0,
-          "paintBooth": 16.0,
-          "paintLine": 8.0
-        },
-        "AM": {
-          "bending": 24.0,
-          "lw": 44.0,
-          "cw": 60.0,
-          "growing": 120.0,
-          "paintBooth": 64.0,
-          "paintLine": 32.0
-        },
-        "PT On": {
-          "bending": 12.0,
-          "lw": 16.0,
-          "cw": 26.0,
-          "growing": 24.0,
-          "paintBooth": 16.0,
-          "paintLine": 16.0
-        },
-        "PT Off": {
-          "bending": 16.0,
-          "lw": 28.0,
-          "cw": 50.0,
-          "growing": 44.0,
-          "paintBooth": 24.0,
-          "paintLine": 16.0
-        }
-      },
-      "production": {
-        "VN #1": {
-          "bending": 757.0,
-          "lw": 765.0,
-          "cw": 797.0,
-          "btgt": 43.0,
-          "wtgt": 47.0
-        },
-        "VN #2": {
-          "bending": 463.0,
-          "lw": 457.0,
-          "cw": 452.0,
-          "btgt": 38.0,
-          "wtgt": 44.0
-        },
-        "TW": {
-          "bending": 100.0,
-          "lw": 102.5,
-          "cw": 89.4,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "CN": {
-          "bending": 1083.0,
-          "lw": 1083.0,
-          "cw": 1241.23,
-          "btgt": 148.0,
-          "wtgt": 148.0
-        },
-        "TR #1": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "TR #2": {
-          "bending": 606.0,
-          "lw": 607.0,
-          "cw": 706.5,
-          "btgt": 69.0,
-          "wtgt": 64.0
-        },
-        "AM": {
-          "bending": 2503.0,
-          "lw": 2532.0,
-          "cw": 2231.0,
-          "btgt": 278.0,
-          "wtgt": 269.0
-        },
-        "PT On": {
-          "bending": 454.0,
-          "lw": 463.0,
-          "cw": 540.0,
-          "btgt": 63.0,
-          "wtgt": 62.0
-        },
-        "PT Off": {
-          "bending": 240.0,
-          "lw": 246.0,
-          "cw": 291.0,
-          "btgt": 31.0,
-          "wtgt": 36.0
-        }
-      }
-    },
-    "2026-Apr": {
-      "equipment": {
-        "VN #1": {
           "bending": 30.0,
           "lw": 50.0,
           "cw": 50.0,
@@ -8520,32 +7906,32 @@ const monthlyData = {
       },
       "production": {
         "VN #1": {
-          "bending": 831.0,
-          "lw": 841.0,
-          "cw": 881.0,
-          "btgt": 62.0,
-          "wtgt": 41.0
+          "bending": 965.0,
+          "lw": 969.0,
+          "cw": 1017.0,
+          "btgt": 55.0,
+          "wtgt": 59.0
         },
         "VN #2": {
-          "bending": 583.0,
-          "lw": 573.0,
-          "cw": 620.0,
-          "btgt": 56.0,
-          "wtgt": 55.0
+          "bending": 593.0,
+          "lw": 582.0,
+          "cw": 597.0,
+          "btgt": 51.0,
+          "wtgt": 57.0
         },
         "TW": {
-          "bending": 96.0,
-          "lw": 90.0,
-          "cw": 93.2,
-          "btgt": 8.0,
-          "wtgt": 2.0
+          "bending": 118.0,
+          "lw": 120.5,
+          "cw": 107.1,
+          "btgt": 1.0,
+          "wtgt": 0.0
         },
         "CN": {
-          "bending": 990.0,
-          "lw": 990.0,
-          "cw": 1123.0,
-          "btgt": 140.0,
-          "wtgt": 132.0
+          "bending": 1196.0,
+          "lw": 1196.0,
+          "cw": 1380.23,
+          "btgt": 162.0,
+          "wtgt": 162.0
         },
         "TR #1": {
           "bending": 0.0,
@@ -8555,32 +7941,173 @@ const monthlyData = {
           "wtgt": 0.0
         },
         "TR #2": {
-          "bending": 845.0,
-          "lw": 837.0,
-          "cw": 950.0,
-          "btgt": 116.0,
-          "wtgt": 113.0
+          "bending": 775.0,
+          "lw": 773.0,
+          "cw": 914.5,
+          "btgt": 94.0,
+          "wtgt": 89.0
         },
         "AM": {
-          "bending": 2882.0,
-          "lw": 2850.0,
-          "cw": 2554.0,
-          "btgt": 346.0,
-          "wtgt": 313.0
+          "bending": 3097.0,
+          "lw": 3107.0,
+          "cw": 2769.0,
+          "btgt": 351.0,
+          "wtgt": 342.0
         },
         "PT On": {
-          "bending": 491.0,
-          "lw": 486.0,
-          "cw": 564.0,
-          "btgt": 63.0,
-          "wtgt": 59.0
+          "bending": 537.0,
+          "lw": 538.0,
+          "cw": 642.0,
+          "btgt": 75.0,
+          "wtgt": 74.0
         },
         "PT Off": {
-          "bending": 424.0,
-          "lw": 442.0,
-          "cw": 366.0,
-          "btgt": 29.0,
-          "wtgt": 34.0
+          "bending": 318.0,
+          "lw": 332.0,
+          "cw": 349.0,
+          "btgt": 34.0,
+          "wtgt": 45.0
+        }
+      }
+    },
+    "2026-Apr": {
+      "equipment": {
+        "VN #1": {
+          "bending": 24.0,
+          "lw": 40.0,
+          "cw": 40.0,
+          "growing": 60.0,
+          "paintBooth": 40.0,
+          "paintLine": 20.0
+        },
+        "VN #2": {
+          "bending": 12.0,
+          "lw": 24.0,
+          "cw": 35.2,
+          "growing": 56.0,
+          "paintBooth": 32.0,
+          "paintLine": 16.0
+        },
+        "TW": {
+          "bending": 8.0,
+          "lw": 8.0,
+          "cw": 12.0,
+          "growing": 20.0,
+          "paintBooth": 12.0,
+          "paintLine": 8.0
+        },
+        "CN": {
+          "bending": 16.0,
+          "lw": 40.0,
+          "cw": 48.0,
+          "growing": 80.0,
+          "paintBooth": 88.0,
+          "paintLine": 24.0
+        },
+        "TR #1": {
+          "bending": 8.0,
+          "lw": 12.0,
+          "cw": 16.0,
+          "growing": 12.0,
+          "paintBooth": 12.0,
+          "paintLine": 8.0
+        },
+        "TR #2": {
+          "bending": 12.0,
+          "lw": 16.0,
+          "cw": 24.0,
+          "growing": 24.0,
+          "paintBooth": 16.0,
+          "paintLine": 8.0
+        },
+        "AM": {
+          "bending": 24.0,
+          "lw": 44.0,
+          "cw": 60.0,
+          "growing": 120.0,
+          "paintBooth": 64.0,
+          "paintLine": 32.0
+        },
+        "PT On": {
+          "bending": 12.0,
+          "lw": 16.0,
+          "cw": 26.0,
+          "growing": 24.0,
+          "paintBooth": 16.0,
+          "paintLine": 16.0
+        },
+        "PT Off": {
+          "bending": 16.0,
+          "lw": 28.0,
+          "cw": 50.0,
+          "growing": 44.0,
+          "paintBooth": 24.0,
+          "paintLine": 16.0
+        }
+      },
+      "production": {
+        "VN #1": {
+          "bending": 623.0,
+          "lw": 637.0,
+          "cw": 661.0,
+          "btgt": 50.0,
+          "wtgt": 29.0
+        },
+        "VN #2": {
+          "bending": 453.0,
+          "lw": 448.0,
+          "cw": 475.0,
+          "btgt": 43.0,
+          "wtgt": 42.0
+        },
+        "TW": {
+          "bending": 78.0,
+          "lw": 72.0,
+          "cw": 75.5,
+          "btgt": 7.0,
+          "wtgt": 2.0
+        },
+        "CN": {
+          "bending": 877.0,
+          "lw": 877.0,
+          "cw": 984.0,
+          "btgt": 126.0,
+          "wtgt": 118.0
+        },
+        "TR #1": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "TR #2": {
+          "bending": 676.0,
+          "lw": 671.0,
+          "cw": 742.0,
+          "btgt": 91.0,
+          "wtgt": 88.0
+        },
+        "AM": {
+          "bending": 2288.0,
+          "lw": 2275.0,
+          "cw": 2016.0,
+          "btgt": 273.0,
+          "wtgt": 240.0
+        },
+        "PT On": {
+          "bending": 408.0,
+          "lw": 411.0,
+          "cw": 462.0,
+          "btgt": 51.0,
+          "wtgt": 47.0
+        },
+        "PT Off": {
+          "bending": 346.0,
+          "lw": 356.0,
+          "cw": 308.0,
+          "btgt": 26.0,
+          "wtgt": 25.0
         }
       }
     },
@@ -8661,32 +8188,32 @@ const monthlyData = {
       },
       "production": {
         "VN #1": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 216.0,
+          "lw": 216.0,
+          "cw": 256.0,
+          "btgt": 25.0,
+          "wtgt": 23.0
         },
         "VN #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 185.0,
+          "lw": 183.0,
+          "cw": 196.0,
+          "btgt": 20.0,
+          "wtgt": 24.0
         },
         "TW": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 25.0,
+          "lw": 24.0,
+          "cw": 27.1,
+          "btgt": 2.0,
+          "wtgt": 1.0
         },
         "CN": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 206.0,
+          "lw": 206.0,
+          "cw": 243.0,
+          "btgt": 34.0,
+          "wtgt": 34.0
         },
         "TR #1": {
           "bending": 0.0,
@@ -8696,177 +8223,36 @@ const monthlyData = {
           "wtgt": 0.0
         },
         "TR #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 181.0,
+          "lw": 184.0,
+          "cw": 224.0,
+          "btgt": 26.0,
+          "wtgt": 25.0
         },
         "AM": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 593.0,
+          "lw": 605.0,
+          "cw": 513.0,
+          "btgt": 70.0,
+          "wtgt": 73.0
         },
         "PT On": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 138.0,
+          "lw": 140.0,
+          "cw": 161.0,
+          "btgt": 16.0,
+          "wtgt": 16.0
         },
         "PT Off": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 108.0,
+          "lw": 113.0,
+          "cw": 82.0,
+          "btgt": 7.0,
+          "wtgt": 5.0
         }
       }
     },
     "2026-Jun": {
-      "equipment": {
-        "VN #1": {
-          "bending": 24.0,
-          "lw": 40.0,
-          "cw": 40.0,
-          "growing": 60.0,
-          "paintBooth": 40.0,
-          "paintLine": 20.0
-        },
-        "VN #2": {
-          "bending": 12.0,
-          "lw": 24.0,
-          "cw": 35.2,
-          "growing": 56.0,
-          "paintBooth": 32.0,
-          "paintLine": 16.0
-        },
-        "TW": {
-          "bending": 8.0,
-          "lw": 8.0,
-          "cw": 12.0,
-          "growing": 20.0,
-          "paintBooth": 12.0,
-          "paintLine": 8.0
-        },
-        "CN": {
-          "bending": 16.0,
-          "lw": 40.0,
-          "cw": 48.0,
-          "growing": 80.0,
-          "paintBooth": 88.0,
-          "paintLine": 24.0
-        },
-        "TR #1": {
-          "bending": 8.0,
-          "lw": 12.0,
-          "cw": 16.0,
-          "growing": 12.0,
-          "paintBooth": 12.0,
-          "paintLine": 8.0
-        },
-        "TR #2": {
-          "bending": 12.0,
-          "lw": 16.0,
-          "cw": 24.0,
-          "growing": 24.0,
-          "paintBooth": 16.0,
-          "paintLine": 8.0
-        },
-        "AM": {
-          "bending": 24.0,
-          "lw": 44.0,
-          "cw": 60.0,
-          "growing": 120.0,
-          "paintBooth": 64.0,
-          "paintLine": 32.0
-        },
-        "PT On": {
-          "bending": 12.0,
-          "lw": 16.0,
-          "cw": 26.0,
-          "growing": 24.0,
-          "paintBooth": 16.0,
-          "paintLine": 16.0
-        },
-        "PT Off": {
-          "bending": 16.0,
-          "lw": 28.0,
-          "cw": 50.0,
-          "growing": 44.0,
-          "paintBooth": 24.0,
-          "paintLine": 16.0
-        }
-      },
-      "production": {
-        "VN #1": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "VN #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "TW": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "CN": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "TR #1": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "TR #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "AM": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "PT On": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        },
-        "PT Off": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
-        }
-      }
-    },
-    "2026-Jul": {
       "equipment": {
         "VN #1": {
           "bending": 30.0,
@@ -9007,7 +8393,7 @@ const monthlyData = {
         }
       }
     },
-    "2026-Aug": {
+    "2026-Jul": {
       "equipment": {
         "VN #1": {
           "bending": 24.0,
@@ -9080,6 +8466,147 @@ const monthlyData = {
           "growing": 44.0,
           "paintBooth": 24.0,
           "paintLine": 16.0
+        }
+      },
+      "production": {
+        "VN #1": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "VN #2": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "TW": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "CN": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "TR #1": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "TR #2": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "AM": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "PT On": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        },
+        "PT Off": {
+          "bending": 0.0,
+          "lw": 0.0,
+          "cw": 0.0,
+          "btgt": 0.0,
+          "wtgt": 0.0
+        }
+      }
+    },
+    "2026-Aug": {
+      "equipment": {
+        "VN #1": {
+          "bending": 30.0,
+          "lw": 50.0,
+          "cw": 50.0,
+          "growing": 75.0,
+          "paintBooth": 50.0,
+          "paintLine": 25.0
+        },
+        "VN #2": {
+          "bending": 15.0,
+          "lw": 30.0,
+          "cw": 44.0,
+          "growing": 70.0,
+          "paintBooth": 40.0,
+          "paintLine": 20.0
+        },
+        "TW": {
+          "bending": 10.0,
+          "lw": 10.0,
+          "cw": 15.0,
+          "growing": 25.0,
+          "paintBooth": 15.0,
+          "paintLine": 10.0
+        },
+        "CN": {
+          "bending": 20.0,
+          "lw": 50.0,
+          "cw": 60.0,
+          "growing": 100.0,
+          "paintBooth": 110.0,
+          "paintLine": 30.0
+        },
+        "TR #1": {
+          "bending": 10.0,
+          "lw": 15.0,
+          "cw": 20.0,
+          "growing": 15.0,
+          "paintBooth": 15.0,
+          "paintLine": 10.0
+        },
+        "TR #2": {
+          "bending": 15.0,
+          "lw": 20.0,
+          "cw": 30.0,
+          "growing": 30.0,
+          "paintBooth": 20.0,
+          "paintLine": 10.0
+        },
+        "AM": {
+          "bending": 30.0,
+          "lw": 55.0,
+          "cw": 75.0,
+          "growing": 150.0,
+          "paintBooth": 80.0,
+          "paintLine": 40.0
+        },
+        "PT On": {
+          "bending": 15.0,
+          "lw": 20.0,
+          "cw": 32.5,
+          "growing": 30.0,
+          "paintBooth": 20.0,
+          "paintLine": 20.0
+        },
+        "PT Off": {
+          "bending": 20.0,
+          "lw": 35.0,
+          "cw": 62.5,
+          "growing": 55.0,
+          "paintBooth": 30.0,
+          "paintLine": 20.0
         }
       },
       "production": {
@@ -9292,76 +8819,76 @@ const monthlyData = {
     "2026-Oct": {
       "equipment": {
         "VN #1": {
-          "bending": 30.0,
-          "lw": 50.0,
-          "cw": 50.0,
-          "growing": 75.0,
-          "paintBooth": 50.0,
-          "paintLine": 25.0
-        },
-        "VN #2": {
-          "bending": 15.0,
-          "lw": 30.0,
-          "cw": 44.0,
-          "growing": 70.0,
+          "bending": 24.0,
+          "lw": 40.0,
+          "cw": 40.0,
+          "growing": 60.0,
           "paintBooth": 40.0,
           "paintLine": 20.0
         },
+        "VN #2": {
+          "bending": 12.0,
+          "lw": 24.0,
+          "cw": 35.2,
+          "growing": 56.0,
+          "paintBooth": 32.0,
+          "paintLine": 16.0
+        },
         "TW": {
-          "bending": 10.0,
-          "lw": 10.0,
-          "cw": 15.0,
-          "growing": 25.0,
-          "paintBooth": 15.0,
-          "paintLine": 10.0
+          "bending": 8.0,
+          "lw": 8.0,
+          "cw": 12.0,
+          "growing": 20.0,
+          "paintBooth": 12.0,
+          "paintLine": 8.0
         },
         "CN": {
-          "bending": 20.0,
-          "lw": 50.0,
-          "cw": 60.0,
-          "growing": 100.0,
-          "paintBooth": 110.0,
-          "paintLine": 30.0
+          "bending": 16.0,
+          "lw": 40.0,
+          "cw": 48.0,
+          "growing": 80.0,
+          "paintBooth": 88.0,
+          "paintLine": 24.0
         },
         "TR #1": {
-          "bending": 10.0,
-          "lw": 15.0,
-          "cw": 20.0,
-          "growing": 15.0,
-          "paintBooth": 15.0,
-          "paintLine": 10.0
+          "bending": 8.0,
+          "lw": 12.0,
+          "cw": 16.0,
+          "growing": 12.0,
+          "paintBooth": 12.0,
+          "paintLine": 8.0
         },
         "TR #2": {
-          "bending": 15.0,
-          "lw": 20.0,
-          "cw": 30.0,
-          "growing": 30.0,
-          "paintBooth": 20.0,
-          "paintLine": 10.0
+          "bending": 12.0,
+          "lw": 16.0,
+          "cw": 24.0,
+          "growing": 24.0,
+          "paintBooth": 16.0,
+          "paintLine": 8.0
         },
         "AM": {
-          "bending": 30.0,
-          "lw": 55.0,
-          "cw": 75.0,
-          "growing": 150.0,
-          "paintBooth": 80.0,
-          "paintLine": 40.0
+          "bending": 24.0,
+          "lw": 44.0,
+          "cw": 60.0,
+          "growing": 120.0,
+          "paintBooth": 64.0,
+          "paintLine": 32.0
         },
         "PT On": {
-          "bending": 15.0,
-          "lw": 20.0,
-          "cw": 32.5,
-          "growing": 30.0,
-          "paintBooth": 20.0,
-          "paintLine": 20.0
+          "bending": 12.0,
+          "lw": 16.0,
+          "cw": 26.0,
+          "growing": 24.0,
+          "paintBooth": 16.0,
+          "paintLine": 16.0
         },
         "PT Off": {
-          "bending": 20.0,
-          "lw": 35.0,
-          "cw": 62.5,
-          "growing": 55.0,
-          "paintBooth": 30.0,
-          "paintLine": 20.0
+          "bending": 16.0,
+          "lw": 28.0,
+          "cw": 50.0,
+          "growing": 44.0,
+          "paintBooth": 24.0,
+          "paintLine": 16.0
         }
       },
       "production": {
@@ -9433,76 +8960,76 @@ const monthlyData = {
     "2026-Nov": {
       "equipment": {
         "VN #1": {
-          "bending": 24.0,
-          "lw": 40.0,
-          "cw": 40.0,
-          "growing": 60.0,
+          "bending": 30.0,
+          "lw": 50.0,
+          "cw": 50.0,
+          "growing": 75.0,
+          "paintBooth": 50.0,
+          "paintLine": 25.0
+        },
+        "VN #2": {
+          "bending": 15.0,
+          "lw": 30.0,
+          "cw": 44.0,
+          "growing": 70.0,
           "paintBooth": 40.0,
           "paintLine": 20.0
         },
-        "VN #2": {
-          "bending": 12.0,
-          "lw": 24.0,
-          "cw": 35.2,
-          "growing": 56.0,
-          "paintBooth": 32.0,
-          "paintLine": 16.0
-        },
         "TW": {
-          "bending": 8.0,
-          "lw": 8.0,
-          "cw": 12.0,
-          "growing": 20.0,
-          "paintBooth": 12.0,
-          "paintLine": 8.0
+          "bending": 10.0,
+          "lw": 10.0,
+          "cw": 15.0,
+          "growing": 25.0,
+          "paintBooth": 15.0,
+          "paintLine": 10.0
         },
         "CN": {
-          "bending": 16.0,
-          "lw": 40.0,
-          "cw": 48.0,
-          "growing": 80.0,
-          "paintBooth": 88.0,
-          "paintLine": 24.0
+          "bending": 20.0,
+          "lw": 50.0,
+          "cw": 60.0,
+          "growing": 100.0,
+          "paintBooth": 110.0,
+          "paintLine": 30.0
         },
         "TR #1": {
-          "bending": 8.0,
-          "lw": 12.0,
-          "cw": 16.0,
-          "growing": 12.0,
-          "paintBooth": 12.0,
-          "paintLine": 8.0
+          "bending": 10.0,
+          "lw": 15.0,
+          "cw": 20.0,
+          "growing": 15.0,
+          "paintBooth": 15.0,
+          "paintLine": 10.0
         },
         "TR #2": {
-          "bending": 12.0,
-          "lw": 16.0,
-          "cw": 24.0,
-          "growing": 24.0,
-          "paintBooth": 16.0,
-          "paintLine": 8.0
+          "bending": 15.0,
+          "lw": 20.0,
+          "cw": 30.0,
+          "growing": 30.0,
+          "paintBooth": 20.0,
+          "paintLine": 10.0
         },
         "AM": {
-          "bending": 24.0,
-          "lw": 44.0,
-          "cw": 60.0,
-          "growing": 120.0,
-          "paintBooth": 64.0,
-          "paintLine": 32.0
+          "bending": 30.0,
+          "lw": 55.0,
+          "cw": 75.0,
+          "growing": 150.0,
+          "paintBooth": 80.0,
+          "paintLine": 40.0
         },
         "PT On": {
-          "bending": 12.0,
-          "lw": 16.0,
-          "cw": 26.0,
-          "growing": 24.0,
-          "paintBooth": 16.0,
-          "paintLine": 16.0
+          "bending": 15.0,
+          "lw": 20.0,
+          "cw": 32.5,
+          "growing": 30.0,
+          "paintBooth": 20.0,
+          "paintLine": 20.0
         },
         "PT Off": {
-          "bending": 16.0,
-          "lw": 28.0,
-          "cw": 50.0,
-          "growing": 44.0,
-          "paintBooth": 24.0,
-          "paintLine": 16.0
+          "bending": 20.0,
+          "lw": 35.0,
+          "cw": 62.5,
+          "growing": 55.0,
+          "paintBooth": 30.0,
+          "paintLine": 20.0
         }
       },
       "production": {
@@ -9648,18 +9175,18 @@ const monthlyData = {
       },
       "production": {
         "VN #1": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 217.0,
+          "lw": 217.2,
+          "cw": 244.1,
+          "btgt": 23.0,
+          "wtgt": 19.0
         },
         "VN #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 156.0,
+          "lw": 158.0,
+          "cw": 164.6,
+          "btgt": 23.0,
+          "wtgt": 22.0
         },
         "TW": {
           "bending": 0.0,
@@ -9669,11 +9196,11 @@ const monthlyData = {
           "wtgt": 0.0
         },
         "CN": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 215.0,
+          "lw": 215.0,
+          "cw": 247.0,
+          "btgt": 24.0,
+          "wtgt": 24.0
         },
         "TR #1": {
           "bending": 0.0,
@@ -9683,11 +9210,11 @@ const monthlyData = {
           "wtgt": 0.0
         },
         "TR #2": {
-          "bending": 0.0,
-          "lw": 0.0,
-          "cw": 0.0,
-          "btgt": 0.0,
-          "wtgt": 0.0
+          "bending": 118.0,
+          "lw": 124.0,
+          "cw": 158.0,
+          "btgt": 15.0,
+          "wtgt": 20.0
         },
         "AM": {
           "bending": 0.0,
@@ -9713,859 +9240,101 @@ const monthlyData = {
       }
     }
   }
-};;;;;
-
-        let charts = {};
-        let trendCharts = {};
-        const factories = ['VN #1', 'VN #2', 'TW', 'CN', 'TR #1', 'TR #2', 'AM', 'PT On', 'PT Off'];
-        const factoriesWithTotal = [...factories, 'CS Total'];
-        const factoryColors = {
-            'VN #1': '#1D4ED8',
-            'VN #2': '#60A5FA',
-            'TW': '#0F766E',
-            'CN': '#B91C1C',
-            'TR #1': '#C2410C',
-            'TR #2': '#FB923C',
-            'AM': '#7C3AED',
-            'PT On': '#0891B2',
-            'PT Off': '#4B5563',
-            'CS Total': '#0F172A'
-        };
-
-        // 선택된 공장 추적
-        let selectedFactories = new Set(factoriesWithTotal);
-
-        // 숫자 포맷팅 (소수점 2자리)
-        function formatNumber(num) {
-            if (num === 0 || num === null || num === undefined || isNaN(num)) return '0.00';
-            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
-        // 체크박스 초기화
-        function initFactoryCheckboxes() {
-            const container = document.getElementById('factoryCheckboxes');
-            container.innerHTML = '';
-            
-            factoriesWithTotal.forEach(factory => {
-                const div = document.createElement('div');
-                div.className = 'checkbox-item checked';
-                div.id = `checkbox-${factory.replace(/\s/g, '-')}`;
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `check-${factory}`;
-                checkbox.checked = true;
-                checkbox.value = factory;
-                
-                const label = document.createElement('label');
-                label.htmlFor = `check-${factory}`;
-                label.textContent = factory;
-                label.style.color = factoryColors[factory];
-                label.style.fontWeight = factory === 'CS Total' ? '700' : '500';
-                
-                checkbox.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        selectedFactories.add(factory);
-                        div.classList.add('checked');
-                    } else {
-                        selectedFactories.delete(factory);
-                        div.classList.remove('checked');
-                    }
-                    
-                    const year = document.getElementById('yearSelect').value;
-                    const week = document.getElementById('weekSelect').value;
-                    updateTrendCharts(year, week);
-                });
-                
-                div.addEventListener('click', (e) => {
-                    if (e.target !== checkbox) {
-                        checkbox.click();
-                    }
-                });
-                
-                div.appendChild(checkbox);
-                div.appendChild(label);
-                container.appendChild(div);
-            });
-        }
-
-        function getSortedWeeks(year) {
-            return Object.keys(rawData[year]).sort((a, b) => {
-                const numA = parseInt(a.replace('WK', ''));
-                const numB = parseInt(b.replace('WK', ''));
-                return numA - numB;
-            });
-        }
-
-        function getLatestWeekWithData(year) {
-            const weeks = getSortedWeeks(year);
-            for (let i = weeks.length - 1; i >= 0; i--) {
-                const week = weeks[i];
-                const weekData = rawData[year]?.[week];
-                if (!weekData || !weekData.production) continue;
-
-                const hasProduction = Object.values(weekData.production).some(prod => {
-                    if (!prod) return false;
-                    return (prod.bending || 0) > 0 ||
-                           (prod.lw || 0) > 0 ||
-                           (prod.cw || 0) > 0 ||
-                           (prod.btgt || 0) > 0 ||
-                           (prod.wtgt || 0) > 0;
-                });
-
-                if (hasProduction) return week;
-            }
-            return weeks[weeks.length - 1] || weeks[0];
-        }
-
-
-        let currentViewMode = 'weekly';
-
-        const monthWeekMap = {
-            '2026-Jan': ['WK01', 'WK02', 'WK03', 'WK04'],
-            '2026-Feb': ['WK05', 'WK06', 'WK07', 'WK08'],
-            '2026-Mar': ['WK09', 'WK10', 'WK11', 'WK12', 'WK13'],
-            '2026-Apr': ['WK14', 'WK15', 'WK16', 'WK17'],
-            '2026-May': ['WK18', 'WK19', 'WK20', 'WK21'],
-            '2026-Jun': ['WK22', 'WK23', 'WK24', 'WK25', 'WK26'],
-            '2026-Jul': ['WK27', 'WK28', 'WK29', 'WK30'],
-            '2026-Aug': ['WK31', 'WK32', 'WK33', 'WK34'],
-            '2026-Sep': ['WK35', 'WK36', 'WK37', 'WK38', 'WK39'],
-            '2026-Oct': ['WK40', 'WK41', 'WK42', 'WK43'],
-            '2026-Nov': ['WK44', 'WK45', 'WK46', 'WK47'],
-            '2026-Dec': ['WK48', 'WK49', 'WK50', 'WK51', 'WK52', 'WK53']
-        };
-
-        function getSortedMonths(year) {
-            const yearText = year.replace('Y', '');
-            return Object.keys(monthWeekMap).filter(month => month.startsWith(yearText + '-'));
-        }
-
-        function getLatestMonthWithData(year) {
-            const months = getSortedMonths(year);
-            for (let i = months.length - 1; i >= 0; i--) {
-                const month = months[i];
-                if (getMonthlyData(year, month)) return month;
-            }
-            return months[0];
-        }
-
-        function getMonthlyData(year, monthKey) {
-            const weeks = monthWeekMap[monthKey] || [];
-            const validWeeks = weeks.filter(wk => rawData[year]?.[wk]);
-
-            if (validWeeks.length === 0) return null;
-
-            const result = { equipment: {}, production: {} };
-
-            factories.forEach(factory => {
-                result.equipment[factory] = {
-                    bending: 0,
-                    lw: 0,
-                    cw: 0,
-                    growing: 0,
-                    paintBooth: 0,
-                    paintLine: 0
-                };
-
-                result.production[factory] = {
-                    bending: 0,
-                    lw: 0,
-                    cw: 0,
-                    btgt: 0,
-                    wtgt: 0
-                };
-
-                validWeeks.forEach(wk => {
-                    const weekData = rawData[year][wk];
-                    const equip = weekData.equipment[factory] || {};
-                    const prod = weekData.production[factory] || {};
-
-                    Object.keys(result.equipment[factory]).forEach(key => {
-                        result.equipment[factory][key] += equip[key] || 0;
-                    });
-
-                    Object.keys(result.production[factory]).forEach(key => {
-                        result.production[factory][key] += prod[key] || 0;
-                    });
-                });
-            });
-
-            return result;
-        }
-
-        function getPeriodData(year, period) {
-            if (currentViewMode === 'monthly') {
-                return getMonthlyData(year, period);
-            }
-            return rawData[year]?.[period];
-        }
-
-        function getTrendPeriods(year, currentPeriod) {
-            if (currentViewMode === 'monthly') {
-                const months = getSortedMonths(year);
-                const currentIndex = months.indexOf(currentPeriod);
-                const endIndex = currentIndex >= 0 ? currentIndex : months.length - 1;
-                const selectedMonths = months.slice(Math.max(0, endIndex - 9), endIndex + 1);
-                return {
-                    keys: selectedMonths,
-                    labels: selectedMonths.map(m => m.replace(year.replace('Y', '') + '-', ''))
-                };
-            }
-
-            const currentWeekNum = parseInt(currentPeriod.replace('WK', ''));
-            const weeks = [];
-            const weekLabels = [];
-
-            for (let i = 9; i >= 0; i--) {
-                const wNum = currentWeekNum - i;
-                if (wNum > 0) {
-                    const wKey = `WK${wNum.toString().padStart(2, '0')}`;
-                    if (rawData[year]?.[wKey]) {
-                        weeks.push(wKey);
-                        weekLabels.push(wKey);
-                    }
-                }
-            }
-
-            return { keys: weeks, labels: weekLabels };
-        }
-
-        function updateDashboard() {
-            const year = document.getElementById('yearSelect').value;
-            const period = document.getElementById('weekSelect').value;
-            updateTables(year, period);
-            updateTrendCharts(year, period);
-        }
-
-        function initSelectors() {
-            const yearSelect = document.getElementById('yearSelect');
-            const weekSelect = document.getElementById('weekSelect');
-            const weeklyBtn = document.getElementById('weeklyBtn');
-            const monthlyBtn = document.getElementById('monthlyBtn');
-
-            const years = Object.keys(rawData).sort((a, b) => b.localeCompare(a));
-
-            yearSelect.innerHTML = '';
-
-            years.forEach(year => {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                yearSelect.appendChild(option);
-            });
-
-            const currentYear = years[0];
-            yearSelect.value = currentYear;
-
-            updateWeekSelector(currentYear);
-            weekSelect.value = getLatestWeekWithData(currentYear);
-
-            weeklyBtn.addEventListener('click', () => {
-                currentViewMode = 'weekly';
-                weeklyBtn.classList.add('active');
-                monthlyBtn.classList.remove('active');
-
-                updateWeekSelector(yearSelect.value);
-                weekSelect.value = getLatestWeekWithData(yearSelect.value);
-                updateDashboard();
-            });
-
-            monthlyBtn.addEventListener('click', () => {
-                currentViewMode = 'monthly';
-                monthlyBtn.classList.add('active');
-                weeklyBtn.classList.remove('active');
-
-                updateWeekSelector(yearSelect.value);
-                weekSelect.value = getLatestMonthWithData(yearSelect.value);
-                updateDashboard();
-            });
-
-            yearSelect.addEventListener('change', () => {
-                updateWeekSelector(yearSelect.value);
-
-                if (currentViewMode === 'monthly') {
-                    weekSelect.value = getLatestMonthWithData(yearSelect.value);
-                } else {
-                    weekSelect.value = getLatestWeekWithData(yearSelect.value);
-                }
-
-                updateDashboard();
-            });
-
-            weekSelect.addEventListener('change', updateDashboard);
-        }
-
-        function updateWeekSelector(year) {
-            const weekSelect = document.getElementById('weekSelect');
-            const periodLabel = document.getElementById('periodLabel');
-
-            weekSelect.innerHTML = '';
-
-            if (currentViewMode === 'monthly') {
-                periodLabel.textContent = 'Month:';
-
-                getSortedMonths(year).forEach(month => {
-                    const option = document.createElement('option');
-                    option.value = month;
-                    option.textContent = month;
-                    weekSelect.appendChild(option);
-                });
-
-                return;
-            }
-
-            periodLabel.textContent = 'Week:';
-
-            const weeks = getSortedWeeks(year);
-            weeks.forEach(week => {
-                const option = document.createElement('option');
-                option.value = week;
-                option.textContent = week;
-                weekSelect.appendChild(option);
-            });
-        }
-
-        function calculateEfficiency(production, equipment) {
-            if (isNaN(production) || isNaN(equipment) || equipment <= 0) return 0;
-            const result = production / equipment;
-            return isNaN(result) ? 0 : result;
-        }
-
-        function updateTables(year, week) {
-            const data = getPeriodData(year, week);
-            if (!data) return;
-
-            const equipmentBody = document.getElementById('equipmentTableBody');
-            equipmentBody.innerHTML = '';
-            
-            let totalEquip = { bending: 0, lw: 0, cw: 0, growing: 0, paintBooth: 0, paintLine: 0 };
-            
-            factories.forEach(factory => {
-                const equip = data.equipment[factory];
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="factory-col">${factory}</td>
-                    <td>${formatNumber(equip.bending)}</td>
-                    <td>${formatNumber(equip.lw)}</td>
-                    <td>${formatNumber(equip.cw)}</td>
-                    <td>${formatNumber(equip.growing)}</td>
-                    <td>${formatNumber(equip.paintBooth)}</td>
-                    <td>${formatNumber(equip.paintLine)}</td>
-                    <td></td>
-                `;
-                equipmentBody.appendChild(row);
-                Object.keys(totalEquip).forEach(key => totalEquip[key] += equip[key]);
-            });
-
-            const totalRow = document.createElement('tr');
-            totalRow.className = 'total-row';
-            totalRow.innerHTML = `
-                <td class="factory-col">CS Total</td>
-                <td>${formatNumber(totalEquip.bending)}</td>
-                <td>${formatNumber(totalEquip.lw)}</td>
-                <td>${formatNumber(totalEquip.cw)}</td>
-                <td>${formatNumber(totalEquip.growing)}</td>
-                <td>${formatNumber(totalEquip.paintBooth)}</td>
-                <td>${formatNumber(totalEquip.paintLine)}</td>
-                <td></td>
-            `;
-            equipmentBody.appendChild(totalRow);
-
-            const productionBody = document.getElementById('productionTableBody');
-            productionBody.innerHTML = '';
-            
-            let totalProd = { bending: 0, lw: 0, cw: 0, btgt: 0, wtgt: 0, wtgt2: 0 };
-            
-            factories.forEach(factory => {
-                const prod = data.production[factory];
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="factory-col">${factory}</td>
-                    <td>${formatNumber(prod.bending)}</td>
-                    <td>${formatNumber(prod.lw)}</td>
-                    <td>${formatNumber(prod.cw)}</td>
-                    <td>${formatNumber(prod.btgt)}</td>
-                    <td>${formatNumber(prod.wtgt || 0)}</td>
-                    <td>${formatNumber(prod.wtgt || 0)}</td>
-                    <td></td>
-                `;
-                productionBody.appendChild(row);
-                Object.keys(totalProd).forEach(key => {
-                    if (key === 'wtgt2') {
-                        totalProd[key] += (prod.wtgt || 0); // Paint Line also uses wtgt
-                    } else {
-                        totalProd[key] += (prod[key] || 0);
-                    }
-                });
-            });
-
-            const prodTotalRow = document.createElement('tr');
-            prodTotalRow.className = 'total-row';
-            prodTotalRow.innerHTML = `
-                <td class="factory-col">CS Total</td>
-                <td>${formatNumber(totalProd.bending)}</td>
-                <td>${formatNumber(totalProd.lw)}</td>
-                <td>${formatNumber(totalProd.cw)}</td>
-                <td>${formatNumber(totalProd.btgt)}</td>
-                <td>${formatNumber(totalProd.wtgt)}</td>
-                <td>${formatNumber(totalProd.wtgt2)}</td>
-                <td></td>
-            `;
-            productionBody.appendChild(prodTotalRow);
-
-            const efficiencyBody = document.getElementById('efficiencyTableBody');
-            efficiencyBody.innerHTML = '';
-            
-            const efficiencyData = {};
-            
-            factories.forEach(factory => {
-                const equip = data.equipment[factory];
-                const prod = data.production[factory];
-                efficiencyData[factory] = {
-                    bending: calculateEfficiency(prod.bending, equip.bending),
-                    lw: calculateEfficiency(prod.lw, equip.lw),
-                    cw: calculateEfficiency(prod.cw, equip.cw),
-                    btgt: calculateEfficiency(prod.btgt, equip.growing),
-                    wtpb: calculateEfficiency(prod.wtgt, equip.paintBooth),
-                    wtpl: calculateEfficiency(prod.wtgt || 0, equip.paintLine)
-                };
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="factory-col">${factory}</td>
-                    <td>${formatNumber(efficiencyData[factory].bending)}</td>
-                    <td>${formatNumber(efficiencyData[factory].lw)}</td>
-                    <td>${formatNumber(efficiencyData[factory].cw)}</td>
-                    <td>${formatNumber(efficiencyData[factory].btgt)}</td>
-                    <td>${formatNumber(efficiencyData[factory].wtpb)}</td>
-                    <td>${formatNumber(efficiencyData[factory].wtpl)}</td>
-                    <td></td>
-                `;
-                efficiencyBody.appendChild(row);
-            });
-
-            efficiencyData['CS Total'] = {
-                bending: calculateEfficiency(totalProd.bending, totalEquip.bending),
-                lw: calculateEfficiency(totalProd.lw, totalEquip.lw),
-                cw: calculateEfficiency(totalProd.cw, totalEquip.cw),
-                btgt: calculateEfficiency(totalProd.btgt, totalEquip.growing),
-                wtpb: calculateEfficiency(totalProd.wtgt, totalEquip.paintBooth),
-                wtpl: calculateEfficiency(totalProd.wtgt || 0, totalEquip.paintLine)
-            };
-
-            const csTotalRow = document.createElement('tr');
-            csTotalRow.className = 'total-row';
-            csTotalRow.innerHTML = `
-                <td class="factory-col">CS Total</td>
-                <td>${formatNumber(efficiencyData['CS Total'].bending)}</td>
-                <td>${formatNumber(efficiencyData['CS Total'].lw)}</td>
-                <td>${formatNumber(efficiencyData['CS Total'].cw)}</td>
-                <td>${formatNumber(efficiencyData['CS Total'].btgt)}</td>
-                <td>${formatNumber(efficiencyData['CS Total'].wtpb)}</td>
-                <td>${formatNumber(efficiencyData['CS Total'].wtpl)}</td>
-                <td></td>
-            `;
-            efficiencyBody.appendChild(csTotalRow);
-
-            function calcAvgExcludingZeros(values) {
-                const nonZero = values.filter(v => v > 0);
-                return nonZero.length > 0 ? (nonZero.reduce((a, b) => a + b, 0) / nonZero.length) : 0;
-            }
-            
-            const avgBending = calcAvgExcludingZeros(factories.map(f => efficiencyData[f].bending));
-            const avgLW = calcAvgExcludingZeros(factories.map(f => efficiencyData[f].lw));
-            const avgCW = calcAvgExcludingZeros(factories.map(f => efficiencyData[f].cw));
-            const avgBTGT = calcAvgExcludingZeros(factories.map(f => efficiencyData[f].btgt));
-            const avgWTPB = calcAvgExcludingZeros(factories.map(f => efficiencyData[f].wtpb));
-            const avgWTPL = calcAvgExcludingZeros(factories.map(f => efficiencyData[f].wtpl));
-
-            const avgRow = document.createElement('tr');
-            avgRow.className = 'total-row';
-            avgRow.innerHTML = `
-                <td class="factory-col">Average</td>
-                <td>${formatNumber(avgBending)}</td>
-                <td>${formatNumber(avgLW)}</td>
-                <td>${formatNumber(avgCW)}</td>
-                <td>${formatNumber(avgBTGT)}</td>
-                <td>${formatNumber(avgWTPB)}</td>
-                <td>${formatNumber(avgWTPL)}</td>
-                <td>🎱 Zero excluded</td>
-            `;
-            efficiencyBody.appendChild(avgRow);
-
-            updateBarCharts(efficiencyData, { avgBending, avgLW, avgCW, avgBTGT, avgWTPB, avgWTPL });
-        }
-
-        function createBarChart(canvasId, labels, data, average) {
-            const ctx = document.getElementById(canvasId);
-            if (charts[canvasId]) {
-                charts[canvasId].destroy();
-            }
-
-            const colors = labels.map(label => 
-                label === 'CS Total' ? '#0F172A' : (factoryColors[label] || '#4F6D8A')
-            );
-            const maxDataValue = Math.max(...data, average || 0, 0);
-            const suggestedMax = maxDataValue > 0 ? Math.ceil(maxDataValue * 1.18) : 10;
-
-            
-            // Update average-line with actual average value
-            const chartContainer = ctx.closest('.chart-container');
-            if (chartContainer) {
-                const avgLineDiv = chartContainer.querySelector('.average-line');
-                if (avgLineDiv) {
-                    avgLineDiv.textContent = `Avg. ${formatNumber(average)}`;
-                }
-            }
-
-            charts[canvasId] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderColor: '#ffffff',
-                        borderWidth: 1.1,
-                        borderRadius: 8,
-                        borderSkipped: false,
-                        hoverBorderColor: '#0F172A',
-                        hoverBorderWidth: 1.2,
-                        maxBarThickness: 36,
-                        categoryPercentage: 0.74,
-                        barPercentage: 0.86
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    layout: {
-                        padding: {
-                            top: 34,
-                            right: 12,
-                            left: 12,
-                            bottom: 10
-                        }
-                    },
-                    plugins: {
-                        datalabels: {
-                        display: true,
-                        anchor: 'end',
-                        align: function(context) {
-                            const value = context.dataset.data[context.dataIndex];
-                            const max = Math.max(...context.dataset.data, 0);
-                            return value >= max * 0.85 ? 'end' : 'top';
-                        },
-                        offset: function(context) {
-                            const value = context.dataset.data[context.dataIndex];
-                            const max = Math.max(...context.dataset.data, 0);
-                            return value >= max * 0.85 ? 2 : 6;
-                        },
-                        clamp: true,
-                        clip: false,
-                        formatter: (value) => {
-                            if (value === null || value === undefined || value === 0) return '';
-                            return formatNumber(value);
-                        },
-                        font: {
-                            weight: 'bold',
-                            size: 11
-                        },
-                        color: function() {
-                            return '#0F172A';
-                        },
-                        padding: {
-                            top: 4,
-                            bottom: 4
-                        }
-                    },
-                legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => formatNumber(context.parsed.y)
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            suggestedMax: suggestedMax,
-                            grace: '10%',
-                            grid: { color: '#d6e0ea' },
-                            ticks: {
-                                color: '#486581',
-                                padding: 6,
-                                callback: function(value) {
-                                    return formatNumber(value);
-                                }
-                            }
-                        },
-                        x: {
-                            offset: true,
-                            grid: { display: false },
-                            ticks: {
-                                autoSkip: false,
-                                color: '#334E68',
-                                padding: 10,
-                                maxRotation: 0,
-                                minRotation: 0,
-                                font: {
-                                    size: 10,
-                                    weight: '700'
-                                }
-                            }
-                        }
-                    }
-                },
-                plugins: [{
-                    id: 'averageLine',
-                    afterDatasetsDraw: (chart) => {
-                        const ctx = chart.ctx;
-                        const chartArea = chart.chartArea;
-                        const yScale = chart.scales.y;
-                        const y = yScale.getPixelForValue(average);
-                        
-                        ctx.save();
-                        ctx.strokeStyle = '#C97A2B';
-                        ctx.lineWidth = 2;
-                        ctx.setLineDash([5, 5]);
-                        ctx.beginPath();
-                        ctx.moveTo(chartArea.left, y);
-                        ctx.lineTo(chartArea.right, y);
-                        ctx.stroke();
-                        ctx.restore();
-                    }
-                }]
-            });
-        }
-
-        function updateBarCharts(efficiencyData, averages) {
-            const labels = factoriesWithTotal;
-            
-            createBarChart('chartBending', labels, 
-                labels.map(f => efficiencyData[f].bending), 
-                averages.avgBending);
-            
-            createBarChart('chartLW', labels, 
-                labels.map(f => efficiencyData[f].lw), 
-                averages.avgLW);
-            
-            createBarChart('chartCW', labels, 
-                labels.map(f => efficiencyData[f].cw), 
-                averages.avgCW);
-            
-            createBarChart('chartBTGT', labels, 
-                labels.map(f => efficiencyData[f].btgt), 
-                averages.avgBTGT);
-            
-            createBarChart('chartWTPB', labels, 
-                labels.map(f => efficiencyData[f].wtpb), 
-                averages.avgWTPB);
-            
-            createBarChart('chartWTPL', labels, 
-                labels.map(f => efficiencyData[f].wtpl), 
-                averages.avgWTPL);
-        }
-
-        function createTrendChart(canvasId, weeks, datasets) {
-            const ctx = document.getElementById(canvasId);
-            if (trendCharts[canvasId]) {
-                trendCharts[canvasId].destroy();
-            }
-
-            trendCharts[canvasId] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weeks,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                    datalabels: {
-                        display: true,
-                        align: 'top',
-                        anchor: 'center',
-                        backgroundColor: function(context) {
-                            // Match line color with semi-transparent background
-                            return context.dataset.borderColor + '20';
-                        },
-                        borderRadius: 3,
-                        color: function(context) {
-                            return context.dataset.borderColor;
-                        },
-                        font: {
-                            weight: 'bold',
-                            size: 9
-                        },
-                        formatter: (value) => {
-                            if (value === null || value === undefined || value === 0) return '';
-                            return formatNumber(value);
-                        },
-                        padding: {
-                            top: 2,
-                            bottom: 2,
-                            left: 3,
-                            right: 3
-                        },
-                        // Only show labels on every other point to avoid crowding
-                        display: function(context) {
-                            const dataIndex = context.dataIndex;
-                            const datasetIndex = context.datasetIndex;
-                            // Show on first, middle, and last points
-                            const dataLength = context.dataset.data.length;
-                            return dataIndex === 0 || dataIndex === dataLength - 1 || dataIndex === Math.floor(dataLength / 2);
-                        }
-                    },
-                    
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                            labels: { boxWidth: 12, font: { size: 10 } }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => {
-                                    return context.dataset.label + ': ' + formatNumber(context.parsed.y);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#e0e0e0' },
-                            ticks: {
-                                callback: function(value) {
-                                    return formatNumber(value);
-                                }
-                            }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateTrendCharts(year, week) {
-            // week는 "WK06" 형식
-            const currentWeekNum = parseInt(week.replace('WK', ''));
-            const weeks = [];
-            const weekLabels = [];
-            
-            for (let i = 9; i >= 0; i--) {
-                const wNum = currentWeekNum - i;
-                if (wNum > 0) {
-                    const wKey = `WK${wNum.toString().padStart(2, '0')}`;
-                    if (rawData[year]?.[wKey]) {
-                        weeks.push(wKey);
-                        weekLabels.push(wKey);
-                    }
-                }
-            }
-
-            const metrics = ['bending', 'lw', 'cw', 'btgt', 'wtpb', 'wtpl'];
-            const chartIds = ['trendBending', 'trendLW', 'trendCW', 'trendBTGT', 'trendWTPB', 'trendWTPL'];
-
-            metrics.forEach((metric, idx) => {
-                const datasets = factoriesWithTotal
-                    .filter(factory => selectedFactories.has(factory))
-                    .map(factory => {
-                        const data = weeks.map(w => {
-                            const weekData = getPeriodData(year, w);
-                            if (!weekData) return null;
-                            
-                            let efficiency = 0;
-                            
-                            if (factory === 'CS Total') {
-                                let totalEquip = 0;
-                                let totalProd = 0;
-                                
-                                factories.forEach(f => {
-                                    const equip = weekData.equipment[f];
-                                    const prod = weekData.production[f];
-                                    
-                                    switch(metric) {
-                                        case 'bending':
-                                            totalEquip += equip.bending;
-                                            totalProd += prod.bending;
-                                            break;
-                                        case 'lw':
-                                            totalEquip += equip.lw;
-                                            totalProd += prod.lw;
-                                            break;
-                                        case 'cw':
-                                            totalEquip += equip.cw;
-                                            totalProd += prod.cw;
-                                            break;
-                                        case 'btgt':
-                                            totalEquip += equip.growing;
-                                            totalProd += prod.btgt;
-                                            break;
-                                        case 'wtpb':
-                                            totalEquip += equip.paintBooth;
-                                            totalProd += prod.wtgt;
-                                            break;
-                                        case 'wtpl':
-                                            totalEquip += equip.paintLine;
-                                            totalProd += (prod.wtgt || 0);
-                                            break;
-                                    }
-                                });
-                                
-                                efficiency = totalEquip > 0 ? totalProd / totalEquip : 0;
-                            } else {
-                                const equip = weekData.equipment[factory];
-                                const prod = weekData.production[factory];
-                                
-                                switch(metric) {
-                                    case 'bending': 
-                                        efficiency = equip.bending > 0 ? prod.bending / equip.bending : 0;
-                                        break;
-                                    case 'lw': 
-                                        efficiency = equip.lw > 0 ? prod.lw / equip.lw : 0;
-                                        break;
-                                    case 'cw': 
-                                        efficiency = equip.cw > 0 ? prod.cw / equip.cw : 0;
-                                        break;
-                                    case 'btgt': 
-                                        efficiency = equip.growing > 0 ? prod.btgt / equip.growing : 0;
-                                        break;
-                                    case 'wtpb': 
-                                        efficiency = equip.paintBooth > 0 ? prod.wtgt / equip.paintBooth : 0;
-                                        break;
-                                    case 'wtpl': 
-                                        efficiency = equip.paintLine > 0 ? (prod.wtgt || 0) / equip.paintLine : 0;
-                                        break;
-                                }
-                            }
-                            
-                            return parseFloat(efficiency.toFixed(2));
-                        });
-
-                        return {
-                            label: factory,
-                            data: data,
-                            borderColor: factoryColors[factory],
-                            backgroundColor: factoryColors[factory] + '33',
-                            borderWidth: factory === 'CS Total' ? 3 : 2,
-                            tension: 0.3,
-                            pointRadius: factory === 'CS Total' ? 4 : 3,
-                            pointHoverRadius: factory === 'CS Total' ? 6 : 5
-                        };
-                    });
-
-                createTrendChart(chartIds[idx], weekLabels, datasets);
-            });
-        }
-
-        initFactoryCheckboxes();
-        initSelectors();
-        updateDashboard();
-    </script>
+};
+
+const factoryOrder = ['VN #1', 'VN #2', 'TW', 'CN', 'TR #1', 'TR #2', 'AM', 'PT On', 'PT Off'];
+const metricLabels = {
+  bending: 'Bending / Machine', lw: 'L/W / Machine', cw: 'C/W / Machine',
+  btgt: 'BT GT / Growing Line', wtgtBooth: 'WT GT / Paint Booth', wtgtLine: 'WT GT / Paint Line'
+};
+let barChart, trendChart;
+
+function fmt(n, digits=0){ return Number(n || 0).toLocaleString(undefined, {maximumFractionDigits:digits, minimumFractionDigits:digits}); }
+function activeData(){ return document.getElementById('modeSelect').value === 'monthly' ? monthlyData : rawData; }
+function getYears(){ return Object.keys(activeData()).sort(); }
+function periodSortKey(p){
+  if(p.startsWith('WK')) return Number(p.replace('WK',''));
+  const [y,m] = p.split('-'); const months = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  return Number(y)*100 + (months[m] || 0);
+}
+function getPeriods(year){ return Object.keys(activeData()[year] || {}).sort((a,b)=>periodSortKey(a)-periodSortKey(b)); }
+function selectedPayload(){ const y=yearSelect.value, p=periodSelect.value; return (activeData()[y] || {})[p] || {equipment:{}, production:{}}; }
+function factoriesIn(payload){ return factoryOrder.filter(f => payload.equipment[f] || payload.production[f]).concat(Object.keys(payload.equipment).filter(f => !factoryOrder.includes(f))); }
+function sumObj(obj){ return Object.values(obj || {}).reduce((a,b)=>a+Number(b||0),0); }
+function calcEff(eq, prod){
+  return {
+    bending: (prod.bending||0)/(eq.bending||0), lw: (prod.lw||0)/(eq.lw||0), cw: (prod.cw||0)/(eq.cw||0),
+    btgt: (prod.btgt||0)/(eq.growing||0), wtgtBooth: (prod.wtgt||0)/(eq.paintBooth||0), wtgtLine: (prod.wtgt||0)/(eq.paintLine||0)
+  };
+}
+function makeTable(headers, rows){
+  let html = '<table><thead><tr>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+  html += rows.map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join('');
+  return html + '</tbody></table>';
+}
+function fillControls(){
+  const years = getYears();
+  yearSelect.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  yearSelect.value = years[years.length-1] || '';
+  fillPeriods();
+}
+function fillPeriods(){
+  const periods = getPeriods(yearSelect.value);
+  periodSelect.innerHTML = periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  periodSelect.value = periods[periods.length-1] || '';
+  fillFactories();
+}
+function fillFactories(){
+  const payload = selectedPayload(); const factories = factoriesIn(payload);
+  const current = factorySelect.value;
+  factorySelect.innerHTML = factories.map(f=>`<option value="${f}">${f}</option>`).join('');
+  factorySelect.value = factories.includes(current) ? current : (factories[0] || '');
+}
+function renderTables(){
+  const payload = selectedPayload(); const factories = factoriesIn(payload);
+  const eqHeaders = ['Factory','Roll Bending Machine','L/W Machine','C/W Machine','Growing Line','Paint Booth','Paint Line'];
+  const prodHeaders = ['Factory','Bending','L/W','C/W','BT GT','WT GT'];
+  const effHeaders = ['Factory','Bending / Machine','L/W / Machine','C/W / Machine','BT GT / Growing Line','WT GT / Paint Booth','WT GT / Paint Line'];
+  let totalEq=0, totalProd=0, effVals=[];
+  const eqRows=[], prodRows=[], effRows=[];
+  factories.forEach(f=>{
+    const e=payload.equipment[f]||{}, p=payload.production[f]||{}, eff=calcEff(e,p);
+    totalEq += sumObj(e); totalProd += sumObj(p);
+    Object.values(eff).forEach(v=>{ if(isFinite(v) && v>0) effVals.push(v); });
+    eqRows.push([f, fmt(e.bending), fmt(e.lw), fmt(e.cw), fmt(e.growing), fmt(e.paintBooth), fmt(e.paintLine)]);
+    prodRows.push([f, fmt(p.bending), fmt(p.lw), fmt(p.cw), fmt(p.btgt), fmt(p.wtgt)]);
+    effRows.push([f, fmt(eff.bending,2), fmt(eff.lw,2), fmt(eff.cw,2), fmt(eff.btgt,2), fmt(eff.wtgtBooth,2), fmt(eff.wtgtLine,2)]);
+  });
+  equipmentTable.innerHTML = makeTable(eqHeaders, eqRows);
+  productionTable.innerHTML = makeTable(prodHeaders, prodRows);
+  efficiencyTable.innerHTML = makeTable(effHeaders, effRows);
+  kpiPeriod.textContent = `${yearSelect.value} ${periodSelect.value}`;
+  kpiEquipment.textContent = fmt(totalEq);
+  kpiProduction.textContent = fmt(totalProd);
+  kpiProductivity.textContent = effVals.length ? fmt(effVals.reduce((a,b)=>a+b,0)/effVals.length,2) : '-';
+}
+function renderCharts(){
+  const payload=selectedPayload(), factories=factoriesIn(payload);
+  const barData = factories.map(f=>{
+    const e=payload.equipment[f]||{}, p=payload.production[f]||{};
+    const v=(p.bending||0)/(e.bending||0);
+    return isFinite(v) ? v : 0;
+  });
+  if(barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById('barChart'), {type:'bar', data:{labels:factories, datasets:[{label:'Bending / Machine', data:barData, borderWidth:1}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}});
+
+  const mode = modeSelect.value; const data = activeData(); const y=yearSelect.value; const periods=getPeriods(y); const idx=periods.indexOf(periodSelect.value); const selectedFactory=factorySelect.value;
+  const recent = periods.slice(Math.max(0, idx-9), idx+1);
+  const trend = recent.map(p=>{ const pl=(data[y]||{})[p]||{equipment:{},production:{}}; const e=(pl.equipment||{})[selectedFactory]||{}, pr=(pl.production||{})[selectedFactory]||{}; const v=(pr.bending||0)/(e.bending||0); return isFinite(v)?v:0; });
+  if(trendChart) trendChart.destroy();
+  trendChart = new Chart(document.getElementById('trendChart'), {type:'line', data:{labels:recent, datasets:[{label:`${selectedFactory} Bending / Machine`, data:trend, tension:.25, fill:false}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:true}}, scales:{y:{beginAtZero:true}}}});
+}
+function refresh(){ fillFactories(); renderTables(); renderCharts(); }
+modeSelect.addEventListener('change', ()=>{ fillControls(); refresh(); });
+yearSelect.addEventListener('change', ()=>{ fillPeriods(); refresh(); });
+periodSelect.addEventListener('change', refresh);
+factorySelect.addEventListener('change', renderCharts);
+fillControls(); refresh();
+</script>
 </body>
 </html>
