@@ -1,182 +1,168 @@
-#!/usr/bin/env python3
-"""
-CS WIND Dashboard - Excel to HTML Auto Converter
-- Reads Raw Data_Global Equipment-Based Productivity.xlsx / Raw(1)
-- Builds both Weekly and Monthly dashboard data
-- Generates index.html from dashboard_template.html
-"""
-import json
-import sys
-from pathlib import Path
-from datetime import date
-import pandas as pd
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CS WIND Global Equipment-Based Productivity Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root { --bg:#f4f7fb; --card:#ffffff; --ink:#172033; --muted:#667085; --line:#d8e0ea; --blue:#2563eb; --green:#16a34a; --orange:#f59e0b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Arial, 'Malgun Gothic', sans-serif; background:var(--bg); color:var(--ink); }
+    .wrap { max-width: 1480px; margin: 0 auto; padding: 24px; }
+    .hero { background: linear-gradient(135deg, #102a43, #1d4ed8); color:white; border-radius: 18px; padding: 24px 28px; box-shadow:0 12px 28px rgba(16,42,67,.18); }
+    h1 { margin:0; font-size: 28px; letter-spacing:-.3px; }
+    .subtitle { margin-top:8px; color:#dbeafe; font-size:14px; }
+    .controls { display:grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap:14px; margin-top:18px; }
+    .control { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:10px 12px; }
+    .control label { display:block; font-size:12px; color:#dbeafe; margin-bottom:6px; }
+    select { width:100%; padding:9px 10px; border:1px solid #cbd5e1; border-radius:10px; background:white; color:#111827; font-size:14px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:18px; margin-top:20px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:0 8px 18px rgba(15,23,42,.06); }
+    .card h2 { margin:0 0 14px; font-size:18px; }
+    .kpis { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-top:20px; }
+    .kpi { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:0 8px 18px rgba(15,23,42,.06); }
+    .kpi .label { color:var(--muted); font-size:13px; }
+    .kpi .value { margin-top:7px; font-size:27px; font-weight:700; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { border-bottom:1px solid #eef2f7; padding:9px 10px; text-align:right; white-space:nowrap; }
+    th:first-child, td:first-child { text-align:left; font-weight:600; }
+    th { background:#f8fafc; color:#344054; font-size:12px; }
+    tbody tr:hover { background:#f8fbff; }
+    .two { display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+    .chartBox { height:330px; }
+    .foot { text-align:center; color:var(--muted); font-size:12px; padding:22px 0 6px; }
+    @media(max-width: 1000px){ .controls,.kpis,.two{grid-template-columns:1fr;} .wrap{padding:14px;} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>CS WIND Global Equipment-Based Productivity Dashboard</h1>
+      <div class="subtitle">Weekly / Monthly view generated automatically from Excel Raw(1) data</div>
+      <div class="controls">
+        <div class="control"><label>View Mode</label><select id="modeSelect"><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+        <div class="control"><label>Year</label><select id="yearSelect"></select></div>
+        <div class="control"><label>Period</label><select id="periodSelect"></select></div>
+        <div class="control"><label>Factory for Trend</label><select id="factorySelect"></select></div>
+      </div>
+    </div>
 
-FACTORIES_ORDER = ['VN #1', 'VN #2', 'TW', 'CN', 'TR #1', 'TR #2', 'AM', 'PT On', 'PT Off']
+    <div class="kpis">
+      <div class="kpi"><div class="label">Selected Period</div><div class="value" id="kpiPeriod">-</div></div>
+      <div class="kpi"><div class="label">Total Equipment</div><div class="value" id="kpiEquipment">-</div></div>
+      <div class="kpi"><div class="label">Total Production</div><div class="value" id="kpiProduction">-</div></div>
+      <div class="kpi"><div class="label">Avg. Productivity</div><div class="value" id="kpiProductivity">-</div></div>
+    </div>
 
-EQUIPMENT_MAP = {
-    'bending': 'Roll Bending Machine',
-    'lw': 'L/W Machine',
-    'cw': 'C/W Machine',
-    'growing': 'Growing Line',
-    'paintBooth': 'Paint Booth',
-    'paintLine': 'Paint Line',
+    <div class="grid">
+      <div class="card"><h2>1. 공장별 장비 현황 (Equipment Inventory)</h2><div id="equipmentTable"></div></div>
+      <div class="card"><h2>2. 공장별 생산 실적 (Production Performance)</h2><div id="productionTable"></div></div>
+      <div class="card"><h2>3. 장비당 생산 효율성 (Production per Equipment)</h2><div id="efficiencyTable"></div></div>
+      <div class="two">
+        <div class="card"><h2>Factory Productivity Comparison</h2><div class="chartBox"><canvas id="barChart"></canvas></div></div>
+        <div class="card"><h2>Trend of Equipment-Based Productivity</h2><div class="chartBox"><canvas id="trendChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="foot">Made by SJ Lee · Monthly view added for CS WIND Productivity Dashboard</div>
+  </div>
+
+<script>
+%%RAWDATA_PLACEHOLDER%%
+
+const factoryOrder = ['VN #1', 'VN #2', 'TW', 'CN', 'TR #1', 'TR #2', 'AM', 'PT On', 'PT Off'];
+const metricLabels = {
+  bending: 'Bending / Machine', lw: 'L/W / Machine', cw: 'C/W / Machine',
+  btgt: 'BT GT / Growing Line', wtgtBooth: 'WT GT / Paint Booth', wtgtLine: 'WT GT / Paint Line'
+};
+let barChart, trendChart;
+
+function fmt(n, digits=0){ return Number(n || 0).toLocaleString(undefined, {maximumFractionDigits:digits, minimumFractionDigits:digits}); }
+function activeData(){ return document.getElementById('modeSelect').value === 'monthly' ? monthlyData : rawData; }
+function getYears(){ return Object.keys(activeData()).sort(); }
+function periodSortKey(p){
+  if(p.startsWith('WK')) return Number(p.replace('WK',''));
+  const [y,m] = p.split('-'); const months = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  return Number(y)*100 + (months[m] || 0);
 }
-
-PRODUCTION_MAP = {
-    'bending': 'Bending',
-    'lw': 'L/W',
-    'cw': 'C/W',
-    'btgt': 'BT GT',
-    'wtgt': 'WT GT',
+function getPeriods(year){ return Object.keys(activeData()[year] || {}).sort((a,b)=>periodSortKey(a)-periodSortKey(b)); }
+function selectedPayload(){ const y=yearSelect.value, p=periodSelect.value; return (activeData()[y] || {})[p] || {equipment:{}, production:{}}; }
+function factoriesIn(payload){ return factoryOrder.filter(f => payload.equipment[f] || payload.production[f]).concat(Object.keys(payload.equipment).filter(f => !factoryOrder.includes(f))); }
+function sumObj(obj){ return Object.values(obj || {}).reduce((a,b)=>a+Number(b||0),0); }
+function calcEff(eq, prod){
+  return {
+    bending: (prod.bending||0)/(eq.bending||0), lw: (prod.lw||0)/(eq.lw||0), cw: (prod.cw||0)/(eq.cw||0),
+    btgt: (prod.btgt||0)/(eq.growing||0), wtgtBooth: (prod.wtgt||0)/(eq.paintBooth||0), wtgtLine: (prod.wtgt||0)/(eq.paintLine||0)
+  };
 }
+function makeTable(headers, rows){
+  let html = '<table><thead><tr>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+  html += rows.map(r=>'<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>').join('');
+  return html + '</tbody></table>';
+}
+function fillControls(){
+  const years = getYears();
+  yearSelect.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  yearSelect.value = years[years.length-1] || '';
+  fillPeriods();
+}
+function fillPeriods(){
+  const periods = getPeriods(yearSelect.value);
+  periodSelect.innerHTML = periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  periodSelect.value = periods[periods.length-1] || '';
+  fillFactories();
+}
+function fillFactories(){
+  const payload = selectedPayload(); const factories = factoriesIn(payload);
+  const current = factorySelect.value;
+  factorySelect.innerHTML = factories.map(f=>`<option value="${f}">${f}</option>`).join('');
+  factorySelect.value = factories.includes(current) ? current : (factories[0] || '');
+}
+function renderTables(){
+  const payload = selectedPayload(); const factories = factoriesIn(payload);
+  const eqHeaders = ['Factory','Roll Bending Machine','L/W Machine','C/W Machine','Growing Line','Paint Booth','Paint Line'];
+  const prodHeaders = ['Factory','Bending','L/W','C/W','BT GT','WT GT'];
+  const effHeaders = ['Factory','Bending / Machine','L/W / Machine','C/W / Machine','BT GT / Growing Line','WT GT / Paint Booth','WT GT / Paint Line'];
+  let totalEq=0, totalProd=0, effVals=[];
+  const eqRows=[], prodRows=[], effRows=[];
+  factories.forEach(f=>{
+    const e=payload.equipment[f]||{}, p=payload.production[f]||{}, eff=calcEff(e,p);
+    totalEq += sumObj(e); totalProd += sumObj(p);
+    Object.values(eff).forEach(v=>{ if(isFinite(v) && v>0) effVals.push(v); });
+    eqRows.push([f, fmt(e.bending), fmt(e.lw), fmt(e.cw), fmt(e.growing), fmt(e.paintBooth), fmt(e.paintLine)]);
+    prodRows.push([f, fmt(p.bending), fmt(p.lw), fmt(p.cw), fmt(p.btgt), fmt(p.wtgt)]);
+    effRows.push([f, fmt(eff.bending,2), fmt(eff.lw,2), fmt(eff.cw,2), fmt(eff.btgt,2), fmt(eff.wtgtBooth,2), fmt(eff.wtgtLine,2)]);
+  });
+  equipmentTable.innerHTML = makeTable(eqHeaders, eqRows);
+  productionTable.innerHTML = makeTable(prodHeaders, prodRows);
+  efficiencyTable.innerHTML = makeTable(effHeaders, effRows);
+  kpiPeriod.textContent = `${yearSelect.value} ${periodSelect.value}`;
+  kpiEquipment.textContent = fmt(totalEq);
+  kpiProduction.textContent = fmt(totalProd);
+  kpiProductivity.textContent = effVals.length ? fmt(effVals.reduce((a,b)=>a+b,0)/effVals.length,2) : '-';
+}
+function renderCharts(){
+  const payload=selectedPayload(), factories=factoriesIn(payload);
+  const barData = factories.map(f=>{
+    const e=payload.equipment[f]||{}, p=payload.production[f]||{};
+    const v=(p.bending||0)/(e.bending||0);
+    return isFinite(v) ? v : 0;
+  });
+  if(barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById('barChart'), {type:'bar', data:{labels:factories, datasets:[{label:'Bending / Machine', data:barData, borderWidth:1}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}});
 
-MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-
-
-def safe_number(value):
-    try:
-        if pd.isna(value):
-            return 0.0
-        return float(value)
-    except Exception:
-        return 0.0
-
-
-def get_val(df_fac, type_, category):
-    v = df_fac[(df_fac['Type'] == type_) & (df_fac['Category'] == category)]["Q'ty"].sum()
-    return safe_number(v)
-
-
-def week_to_month(year, week):
-    try:
-        y = int(float(year))
-        w = int(float(week))
-        d = date.fromisocalendar(y, max(1, min(w, 53)), 1)
-        return MONTH_NAMES[d.month - 1], f'{y}-{MONTH_NAMES[d.month - 1]}', y * 100 + d.month
-    except Exception:
-        return '', '', 0
-
-
-def normalize_dataframe(excel_path):
-    print(f"엑셀 파일 로드: {excel_path}")
-    df = pd.read_excel(excel_path, sheet_name='Raw(1)')
-    df.columns = [str(c).strip() for c in df.columns]
-
-    required = ['Year', 'Week', 'Factory', 'Type', 'Category', "Q'ty"]
-    missing = [c for c in required if c not in df.columns]
-    if missing:
-        raise ValueError(f"필수 컬럼 누락: {missing}")
-
-    df = df.dropna(subset=['Year', 'Week', 'Factory', 'Type', 'Category'], how='any').copy()
-    df["Q'ty"] = pd.to_numeric(df["Q'ty"], errors='coerce').fillna(0)
-    df['Year'] = pd.to_numeric(df['Year'], errors='coerce').fillna(0).astype(int)
-    df['Week'] = pd.to_numeric(df['Week'], errors='coerce').fillna(0).astype(int)
-    df['Factory'] = df['Factory'].astype(str).str.strip()
-    df['Type'] = df['Type'].astype(str).str.strip()
-    df['Category'] = df['Category'].astype(str).str.strip()
-
-    if 'Month' not in df.columns or 'YearMonth' not in df.columns or 'Month_Sort' not in df.columns:
-        calculated = df.apply(lambda r: week_to_month(r['Year'], r['Week']), axis=1)
-        df['Month'] = calculated.apply(lambda x: x[0])
-        df['YearMonth'] = calculated.apply(lambda x: x[1])
-        df['Month_Sort'] = calculated.apply(lambda x: x[2])
-    else:
-        # Fill blanks or formula cells not evaluated by pandas
-        calculated = df.apply(lambda r: week_to_month(r['Year'], r['Week']), axis=1)
-        df['Month'] = df['Month'].fillna('').astype(str)
-        df['YearMonth'] = df['YearMonth'].fillna('').astype(str)
-        df['Month_Sort'] = pd.to_numeric(df['Month_Sort'], errors='coerce').fillna(0).astype(int)
-        mask = (df['Month'].str.strip() == '') | (df['YearMonth'].str.strip() == '') | (df['Month_Sort'] == 0)
-        if mask.any():
-            df.loc[mask, 'Month'] = calculated[mask].apply(lambda x: x[0])
-            df.loc[mask, 'YearMonth'] = calculated[mask].apply(lambda x: x[1])
-            df.loc[mask, 'Month_Sort'] = calculated[mask].apply(lambda x: x[2]).astype(int)
-
-    print(f"- 총 행 수: {len(df):,}")
-    print(f"- 법인 수: {df['Factory'].nunique()}")
-    print(f"- 주차 범위: WK{df['Week'].min():02d} ~ WK{df['Week'].max():02d}")
-    print(f"- 월 범위: {df.sort_values('Month_Sort')['YearMonth'].iloc[0]} ~ {df.sort_values('Month_Sort')['YearMonth'].iloc[-1]}")
-    return df
-
-
-def build_period_payload(df_period):
-    equipment = {}
-    production = {}
-    factories = [f for f in FACTORIES_ORDER if f in set(df_period['Factory'])]
-    factories += [f for f in sorted(set(df_period['Factory'])) if f not in factories]
-
-    for factory in factories:
-        df_fac = df_period[df_period['Factory'] == factory]
-        equipment[factory] = {key: get_val(df_fac, 'Machine', cat) for key, cat in EQUIPMENT_MAP.items()}
-        production[factory] = {key: get_val(df_fac, 'Performance', cat) for key, cat in PRODUCTION_MAP.items()}
-
-    return {'equipment': equipment, 'production': production}
-
-
-def convert_weekly(df):
-    raw_data = {}
-    for year in sorted(df['Year'].unique()):
-        year_key = f"{int(year)}Y"
-        raw_data[year_key] = {}
-        df_year = df[df['Year'] == year]
-        for week in sorted(df_year['Week'].unique()):
-            week_key = f"WK{int(week):02d}"
-            raw_data[year_key][week_key] = build_period_payload(df_year[df_year['Week'] == week])
-    return raw_data
-
-
-def convert_monthly(df):
-    monthly_data = {}
-    for year in sorted(df['Year'].unique()):
-        year_key = f"{int(year)}Y"
-        monthly_data[year_key] = {}
-        df_year = df[df['Year'] == year].sort_values('Month_Sort')
-        months = df_year[['YearMonth', 'Month_Sort']].drop_duplicates().sort_values('Month_Sort')
-        for _, row in months.iterrows():
-            period_key = str(row['YearMonth'])
-            monthly_data[year_key][period_key] = build_period_payload(df_year[df_year['YearMonth'] == period_key])
-    return monthly_data
-
-
-def build_index_html(raw_data, monthly_data, template_path, output_path):
-    print(f"HTML 템플릿 로드: {template_path}")
-    template = template_path.read_text(encoding='utf-8')
-    js_data = (
-        "const rawData = " + json.dumps(raw_data, ensure_ascii=False, indent=2) + ";\n" +
-        "const monthlyData = " + json.dumps(monthly_data, ensure_ascii=False, indent=2) + ";"
-    )
-    if '%%RAWDATA_PLACEHOLDER%%' not in template:
-        print("❌ 템플릿에 %%RAWDATA_PLACEHOLDER%% 없음")
-        sys.exit(1)
-    output_html = template.replace('%%RAWDATA_PLACEHOLDER%%', js_data)
-    output_path.write_text(output_html, encoding='utf-8')
-    print(f"✅ index.html 생성 완료: {len(output_html):,} bytes")
-
-
-def validate(raw_data, monthly_data):
-    latest_year = sorted(raw_data.keys())[-1]
-    latest_week = sorted(raw_data[latest_year].keys())[-1]
-    latest_month = list(monthly_data[latest_year].keys())[-1]
-    print(f"최신 주간: {latest_year} {latest_week}")
-    print(f"최신 월간: {latest_year} {latest_month}")
-
-
-if __name__ == '__main__':
-    base_dir = Path(__file__).parent.parent
-    excel_path = base_dir / 'Raw Data_Global Equipment-Based Productivity.xlsx'
-    template_path = base_dir / 'dashboard_template.html'
-    output_path = base_dir / 'index.html'
-
-    if not excel_path.exists():
-        print(f"❌ 엑셀 파일 없음: {excel_path}")
-        sys.exit(1)
-    if not template_path.exists():
-        print(f"❌ 템플릿 파일 없음: {template_path}")
-        sys.exit(1)
-
-    df = normalize_dataframe(excel_path)
-    raw_data = convert_weekly(df)
-    monthly_data = convert_monthly(df)
-    build_index_html(raw_data, monthly_data, template_path, output_path)
-    validate(raw_data, monthly_data)
-    print("완료: Weekly / Monthly 전환 대시보드가 생성되었습니다.")
+  const mode = modeSelect.value; const data = activeData(); const y=yearSelect.value; const periods=getPeriods(y); const idx=periods.indexOf(periodSelect.value); const selectedFactory=factorySelect.value;
+  const recent = periods.slice(Math.max(0, idx-9), idx+1);
+  const trend = recent.map(p=>{ const pl=(data[y]||{})[p]||{equipment:{},production:{}}; const e=(pl.equipment||{})[selectedFactory]||{}, pr=(pl.production||{})[selectedFactory]||{}; const v=(pr.bending||0)/(e.bending||0); return isFinite(v)?v:0; });
+  if(trendChart) trendChart.destroy();
+  trendChart = new Chart(document.getElementById('trendChart'), {type:'line', data:{labels:recent, datasets:[{label:`${selectedFactory} Bending / Machine`, data:trend, tension:.25, fill:false}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:true}}, scales:{y:{beginAtZero:true}}}});
+}
+function refresh(){ fillFactories(); renderTables(); renderCharts(); }
+modeSelect.addEventListener('change', ()=>{ fillControls(); refresh(); });
+yearSelect.addEventListener('change', ()=>{ fillPeriods(); refresh(); });
+periodSelect.addEventListener('change', refresh);
+factorySelect.addEventListener('change', renderCharts);
+fillControls(); refresh();
+</script>
+</body>
+</html>
