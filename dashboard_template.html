@@ -14,6 +14,7 @@
       --table:#eef3f7;
       --text:#0f172a;
       --yellow:#ffe699;
+      --muted:#667085;
     }
     *{box-sizing:border-box;}
     body{margin:0;background:var(--bg);font-family:Arial,'Malgun Gothic',sans-serif;color:var(--text);font-size:14px;}
@@ -33,12 +34,21 @@
     tbody tr:nth-child(odd) td{background:#f8fbfd;}
     td:first-child, th:first-child{text-align:left;font-weight:800;width:140px;}
     .total-row td{background:var(--yellow)!important;font-weight:800;}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:10px;}
-    .chart-card{border:1px solid var(--line);background:#fff;border-radius:4px;padding:14px;min-height:320px;}
-    .chart-title{font-weight:800;text-align:center;margin:4px 0 14px;color:#111827;}
-    canvas{width:100%;max-height:260px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:10px;margin-bottom:32px;}
+    .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px;}
+    .chart-card{border:1px solid var(--line);background:#fff;border-radius:8px;padding:14px;min-height:300px;box-shadow:0 2px 8px rgba(15,23,42,.04);}
+    .chart-title{font-weight:800;text-align:center;margin:4px 0 10px;color:#111827;}
+    .chart-unit{text-align:right;color:#64748b;font-size:11px;margin-top:-8px;margin-bottom:6px;}
+    canvas{width:100%;max-height:250px;}
+    .trend-card canvas{max-height:300px;}
+    .factory-box{border:1px solid #cfd9e3;border-radius:8px;padding:14px 16px;background:#f8fbfd;margin:10px 0 22px;}
+    .factory-box-title{font-weight:800;margin-bottom:10px;color:#334155;}
+    .factory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px;}
+    .factory-check{display:flex;align-items:center;gap:7px;border:1px solid #b7c3cf;border-radius:5px;background:white;padding:7px 10px;font-weight:700;font-size:12px;}
+    .factory-check input{margin:0;}
     .foot{text-align:right;color:#6b7280;font-size:12px;margin-top:14px;}
-    @media(max-width:900px){.wrap{margin:0;border:0}.grid{grid-template-columns:1fr}.title{font-size:22px}.controls{gap:12px}.control{width:100%;justify-content:space-between}table{font-size:12px;}.content{padding:16px;}}
+    @media(max-width:1100px){.grid,.trend-grid{grid-template-columns:1fr 1fr}.factory-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:900px){.wrap{margin:0;border:0}.grid,.trend-grid{grid-template-columns:1fr}.title{font-size:22px}.controls{gap:12px}.control{width:100%;justify-content:space-between}.factory-grid{grid-template-columns:1fr 1fr}table{font-size:12px;}.content{padding:16px;}}
   </style>
 </head>
 <body>
@@ -62,12 +72,26 @@
       <h2 class="section-title">3. 장비당 생산 효율성 (Production per Equipment)</h2>
       <div id="efficiencyTable"></div>
       <div class="grid">
-        <div class="chart-card"><div class="chart-title">Bending / Machine</div><canvas id="chartBending"></canvas></div>
-        <div class="chart-card"><div class="chart-title">L/W / Machine</div><canvas id="chartLW"></canvas></div>
-        <div class="chart-card"><div class="chart-title">C/W / Machine</div><canvas id="chartCW"></canvas></div>
-        <div class="chart-card"><div class="chart-title">BT GT / Growing Line</div><canvas id="chartBT"></canvas></div>
-        <div class="chart-card"><div class="chart-title">WT GT / Paint Booth</div><canvas id="chartWTBooth"></canvas></div>
-        <div class="chart-card"><div class="chart-title">WT GT / Paint Line</div><canvas id="chartWTLine"></canvas></div>
+        <div class="chart-card"><div class="chart-title">Bending / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="chartBending"></canvas></div>
+        <div class="chart-card"><div class="chart-title">L/W / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="chartLW"></canvas></div>
+        <div class="chart-card"><div class="chart-title">C/W / Machine</div><div class="chart-unit">(CS Joint / Machine)</div><canvas id="chartCW"></canvas></div>
+        <div class="chart-card"><div class="chart-title">BT GT / Growing Line</div><div class="chart-unit">(BT Sec / Line)</div><canvas id="chartBT"></canvas></div>
+        <div class="chart-card"><div class="chart-title">WT GT / Paint Booth</div><div class="chart-unit">(WT Sec / Booth)</div><canvas id="chartWTBooth"></canvas></div>
+        <div class="chart-card"><div class="chart-title">WT GT / Paint Line</div><div class="chart-unit">(WT Sec / Line)</div><canvas id="chartWTLine"></canvas></div>
+      </div>
+
+      <h2 class="section-title">Trend of Equipment-Based Productivity (최근 10주)</h2>
+      <div class="factory-box">
+        <div class="factory-box-title">공장 선택 (Factory Selection)</div>
+        <div id="factoryChecks" class="factory-grid"></div>
+      </div>
+      <div class="trend-grid">
+        <div class="chart-card trend-card"><div class="chart-title">Bending / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="trendBending"></canvas></div>
+        <div class="chart-card trend-card"><div class="chart-title">L/W / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="trendLW"></canvas></div>
+        <div class="chart-card trend-card"><div class="chart-title">C/W / Machine</div><div class="chart-unit">(CS Joint / Machine)</div><canvas id="trendCW"></canvas></div>
+        <div class="chart-card trend-card"><div class="chart-title">BT GT / Growing Line</div><div class="chart-unit">(BT Sec / Line)</div><canvas id="trendBT"></canvas></div>
+        <div class="chart-card trend-card"><div class="chart-title">WT GT / Paint Booth</div><div class="chart-unit">(WT Sec / Booth)</div><canvas id="trendWTBooth"></canvas></div>
+        <div class="chart-card trend-card"><div class="chart-title">WT GT / Paint Line</div><div class="chart-unit">(WT Sec / Line)</div><canvas id="trendWTLine"></canvas></div>
       </div>
       <div class="foot">Made by SJ Lee</div>
     </div>
@@ -78,7 +102,10 @@
 
 let currentView = 'weekly';
 let charts = {};
-const factoryOrder = ['VN #1','VN #2','TW','CN','TR #1','TR #2','AM','PT On','PT Off'];
+const factoryOrder = ['VN #1','VN #2','TW','CN','TR #1','TR #2','AM','PT On','PT Off','CS Total'];
+const factoryColors = {
+  'VN #1':'#4263eb','VN #2':'#4dabf7','TW':'#2b8a7e','CN':'#e03131','TR #1':'#ff922b','TR #2':'#845ef7','AM':'#15aabf','PT On':'#495057','PT Off':'#212529','CS Total':'#111827'
+};
 const equipmentCols = [
   ['bending','Roll Bending Machine'],['lw','L/W Machine'],['cw','C/W Machine'],['growing','Growing Line'],['paintBooth','Paint Booth'],['paintLine','Paint Line']
 ];
@@ -86,7 +113,10 @@ const productionCols = [
   ['bending','Bending'],['lw','L/W'],['cw','C/W'],['btgt','BT GT'],['wtgt','WT GT']
 ];
 const effCols = [
-  ['bending','Bending / Machine'],['lw','L/W Machine'],['cw','C/W / Machine'],['bt','BT GT / Growing Line'],['wtb','WT GT / Paint Booth'],['wtl','WT GT / Paint Line']
+  ['bending','Bending / Machine'],['lw','L/W / Machine'],['cw','C/W / Machine'],['bt','BT GT / Growing Line'],['wtb','WT GT / Paint Booth'],['wtl','WT GT / Paint Line']
+];
+const chartMap = [
+  ['chartBending','trendBending','bending'],['chartLW','trendLW','lw'],['chartCW','trendCW','cw'],['chartBT','trendBT','bt'],['chartWTBooth','trendWTBooth','wtb'],['chartWTLine','trendWTLine','wtl']
 ];
 function dataset(){ return currentView === 'weekly' ? rawData : monthlyData; }
 function fmt(v){ return Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -96,6 +126,7 @@ function setView(v){
   document.getElementById('btnWeekly').classList.toggle('active',v==='weekly');
   document.getElementById('btnMonthly').classList.toggle('active',v==='monthly');
   document.getElementById('periodLabel').childNodes[0].nodeValue = v==='weekly' ? 'Week: ' : 'Month: ';
+  document.querySelector('.section-title:nth-of-type(4)').textContent = v==='weekly' ? 'Trend of Equipment-Based Productivity (최근 10주)' : 'Trend of Equipment-Based Productivity (최근 10개월)';
   populateSelectors(true);
   render();
 }
@@ -108,14 +139,22 @@ function populateSelectors(resetPeriod=false){
   const years=Object.keys(data).sort();
   years.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;ySel.appendChild(o);});
   if(oldY && years.includes(oldY)) ySel.value=oldY; else ySel.value=years[years.length-1]||'';
-  const periods=Object.keys(data[ySel.value]||{}).sort((a,b)=>{
-    if(currentView==='weekly') return parseInt(a.replace('WK',''))-parseInt(b.replace('WK',''));
-    return a.localeCompare(b);
-  });
+  const periods=sortedPeriods(data[ySel.value]||{});
   const oldP=pSel.value;
   pSel.innerHTML='';
-  periods.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;pSel.appendChild(o);});
+  periods.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=pSelText(p);pSel.appendChild(o);});
   if(!resetPeriod && oldP && periods.includes(oldP)) pSel.value=oldP; else pSel.value=periods[periods.length-1]||'';
+}
+function pSelText(p){ return p; }
+function sortedPeriods(yearObj){
+  const ps=Object.keys(yearObj||{});
+  return ps.sort((a,b)=>{
+    if(currentView==='weekly') return parseInt(a.replace('WK',''))-parseInt(b.replace('WK',''));
+    const ma=a.match(/^(\d{4})-([A-Za-z]{3})$/), mb=b.match(/^(\d{4})-([A-Za-z]{3})$/);
+    const m={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+    if(ma&&mb) return (parseInt(ma[1])*100+m[ma[2]])-(parseInt(mb[1])*100+m[mb[2]]);
+    return a.localeCompare(b);
+  });
 }
 function getPeriodData(){ const d=dataset(); return (d[yearSelect.value]||{})[periodSelect.value] || {equipment:{},production:{}}; }
 function calcEff(eq,pr){
@@ -130,7 +169,7 @@ function calcEff(eq,pr){
 }
 function factoriesInPeriod(pd){
   const s=new Set([...Object.keys(pd.equipment||{}),...Object.keys(pd.production||{})]);
-  return factoryOrder.filter(f=>s.has(f)).concat([...s].filter(f=>!factoryOrder.includes(f)).sort());
+  return factoryOrder.filter(f=>f!=='CS Total' && s.has(f)).concat([...s].filter(f=>!factoryOrder.includes(f)).sort());
 }
 function buildEquipmentTable(pd){
   let totals={}; equipmentCols.forEach(([k])=>totals[k]=0);
@@ -141,9 +180,9 @@ function buildEquipmentTable(pd){
 }
 function buildProductionTable(pd){
   let totals={}; productionCols.forEach(([k])=>totals[k]=0);
-  let html='<table><thead><tr><th>Factory</th>'+productionCols.map(c=>`<th>${c[1]}</th>`).join('')+'<th>WT GT</th><th>Remark</th></tr></thead><tbody>';
-  factoriesInPeriod(pd).forEach(f=>{const pr=pd.production[f]||{}; html+=`<tr><td>${f}</td>`+productionCols.map(([k])=>{totals[k]+=Number(pr[k]||0);return `<td>${fmtInt(pr[k])}</td>`;}).join('')+`<td>${fmtInt(pr.wtgt)}</td><td></td></tr>`;});
-  html+='<tr class="total-row"><td>CS Total</td>'+productionCols.map(([k])=>`<td>${fmtInt(totals[k])}</td>`).join('')+`<td>${fmtInt(totals.wtgt)}</td><td></td></tr></tbody></table>`;
+  let html='<table><thead><tr><th>Factory</th>'+productionCols.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Remark</th></tr></thead><tbody>';
+  factoriesInPeriod(pd).forEach(f=>{const pr=pd.production[f]||{}; html+=`<tr><td>${f}</td>`+productionCols.map(([k])=>{totals[k]+=Number(pr[k]||0);return `<td>${fmtInt(pr[k])}</td>`;}).join('')+'<td></td></tr>';});
+  html+='<tr class="total-row"><td>CS Total</td>'+productionCols.map(([k])=>`<td>${fmtInt(totals[k])}</td>`).join('')+'<td></td></tr></tbody></table>';
   productionTable.innerHTML=html;
 }
 function buildEfficiencyTable(pd){
@@ -154,19 +193,63 @@ function buildEfficiencyTable(pd){
   const t=calcEff(totalEq,totalPr); html+='<tr class="total-row"><td>CS Total</td>'+effCols.map(([k])=>`<td>${fmt(t[k])}</td>`).join('')+'<td></td></tr></tbody></table>';
   efficiencyTable.innerHTML=html;
 }
+function periodTotals(pd){
+  const totalEq={bending:0,lw:0,cw:0,growing:0,paintBooth:0,paintLine:0};
+  const totalPr={bending:0,lw:0,cw:0,btgt:0,wtgt:0};
+  factoriesInPeriod(pd).forEach(f=>{const eq=pd.equipment[f]||{}; const pr=pd.production[f]||{}; Object.keys(totalEq).forEach(k=>totalEq[k]+=Number(eq[k]||0)); Object.keys(totalPr).forEach(k=>totalPr[k]+=Number(pr[k]||0));});
+  return {eq:totalEq,pr:totalPr};
+}
+function effForFactory(pd,f,key){
+  if(f==='CS Total'){
+    const t=periodTotals(pd);
+    return calcEff(t.eq,t.pr)[key]||0;
+  }
+  const eq=(pd.equipment||{})[f]||{}; const pr=(pd.production||{})[f]||{};
+  return calcEff(eq,pr)[key]||0;
+}
 function chartData(pd,key){
-  const labels=factoriesInPeriod(pd); const values=labels.map(f=>{const eq=pd.equipment[f]||{}; const pr=pd.production[f]||{}; const e=calcEff(eq,pr); return e[key]||0;});
+  const labels=factoriesInPeriod(pd).concat(['CS Total']);
+  const values=labels.map(f=>effForFactory(pd,f,key));
   return {labels,values};
 }
 function drawChart(id,key){
   const ctx=document.getElementById(id); if(charts[id]) charts[id].destroy(); const cd=chartData(getPeriodData(),key);
-  charts[id]=new Chart(ctx,{type:'bar',data:{labels:cd.labels,datasets:[{label:key,data:cd.values}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  charts[id]=new Chart(ctx,{type:'bar',data:{labels:cd.labels,datasets:[{label:key,data:cd.values,backgroundColor:cd.labels.map(l=>factoryColors[l]||'#6b7280'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#e5e7eb'}}}});
+}
+function allFactoriesInYear(){
+  const y=yearSelect.value; const data=dataset()[y]||{}; const s=new Set();
+  Object.values(data).forEach(pd=>{Object.keys(pd.equipment||{}).forEach(f=>s.add(f));Object.keys(pd.production||{}).forEach(f=>s.add(f));});
+  return factoryOrder.filter(f=>f!=='CS Total' && s.has(f)).concat([...s].filter(f=>!factoryOrder.includes(f)).sort()).concat(['CS Total']);
+}
+function buildFactoryChecks(){
+  const box=document.getElementById('factoryChecks');
+  const current=[...box.querySelectorAll('input:checked')].map(i=>i.value);
+  const fs=allFactoriesInYear();
+  box.innerHTML=fs.map(f=>`<label class="factory-check"><input type="checkbox" value="${f}" ${current.length===0||current.includes(f)?'checked':''} onchange="drawTrendCharts()"><span style="color:${factoryColors[f]||'#374151'}">${f}</span></label>`).join('');
+}
+function selectedFactories(){
+  return [...document.querySelectorAll('#factoryChecks input:checked')].map(i=>i.value);
+}
+function recentPeriods(){
+  const y=yearSelect.value; const periods=sortedPeriods(dataset()[y]||{}); const selected=periodSelect.value;
+  let idx=periods.indexOf(selected); if(idx<0) idx=periods.length-1;
+  return periods.slice(Math.max(0,idx-9),idx+1);
+}
+function drawTrendChart(id,key){
+  const ctx=document.getElementById(id); if(charts[id]) charts[id].destroy();
+  const y=yearSelect.value; const d=dataset()[y]||{}; const ps=recentPeriods(); const fs=selectedFactories();
+  const datasets=fs.map(f=>({label:f,data:ps.map(p=>effForFactory(d[p]||{equipment:{},production:{}},f,key)),borderColor:factoryColors[f]||'#6b7280',backgroundColor:factoryColors[f]||'#6b7280',tension:.25,pointRadius:2,borderWidth:f==='CS Total'?3:2,fill:false}));
+  charts[id]=new Chart(ctx,{type:'line',data:{labels:ps,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true,grid:{color:'#e5e7eb'}},x:{grid:{display:false}}}});
+}
+function drawTrendCharts(){
+  chartMap.forEach(([,trendId,key])=>drawTrendChart(trendId,key));
 }
 function render(){
   populateSelectors(false);
   const pd=getPeriodData();
   buildEquipmentTable(pd); buildProductionTable(pd); buildEfficiencyTable(pd);
-  drawChart('chartBending','bending'); drawChart('chartLW','lw'); drawChart('chartCW','cw'); drawChart('chartBT','bt'); drawChart('chartWTBooth','wtb'); drawChart('chartWTLine','wtl');
+  chartMap.forEach(([barId,,key])=>drawChart(barId,key));
+  buildFactoryChecks(); drawTrendCharts();
 }
 populateSelectors(true); render();
 </script>
