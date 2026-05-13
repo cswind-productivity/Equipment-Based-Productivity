@@ -1,257 +1,500 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CS WIND Global Equipment-Based Productivity Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root{
-      --bg:#f4f7fb;
-      --navy:#1f4e78;
-      --navy2:#2f5f89;
-      --line:#d8e0e8;
-      --table:#eef3f7;
-      --text:#0f172a;
-      --yellow:#ffe699;
-      --muted:#667085;
-    }
-    *{box-sizing:border-box;}
-    body{margin:0;background:var(--bg);font-family:Arial,'Malgun Gothic',sans-serif;color:var(--text);font-size:14px;}
-    .wrap{max-width:1480px;margin:28px auto 50px;background:#fff;border:1px solid #dbe3eb;box-shadow:0 8px 24px rgba(15,23,42,.08);}
-    .title{background:var(--navy);color:white;text-align:center;padding:30px 20px 26px;font-size:30px;font-weight:800;letter-spacing:.2px;}
-    .controls{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:#f8fafc;border-bottom:1px solid #dbe3eb;padding:16px 24px;}
-    .control{display:flex;align-items:center;gap:8px;font-weight:700;}
-    .toggle{display:inline-flex;border:1px solid #b7c3cf;border-radius:6px;overflow:hidden;background:#e9eef4;}
-    .toggle button{border:0;background:transparent;padding:8px 18px;font-weight:700;cursor:pointer;}
-    .toggle button.active{background:#123a5a;color:white;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);}
-    select{height:34px;min-width:100px;border:1px solid #b7c3cf;border-radius:5px;background:white;padding:4px 12px;font-weight:600;}
-    .content{padding:24px 26px 32px;}
-    .section-title{background:var(--navy);color:white;font-size:17px;font-weight:800;padding:12px 16px;border-radius:6px;margin:0 0 16px;}
-    table{width:100%;border-collapse:separate;border-spacing:0;margin-bottom:30px;table-layout:fixed;}
-    th{background:var(--navy2);color:white;padding:11px 8px;border:1px solid var(--line);font-size:13px;text-align:center;}
-    td{padding:10px 8px;border:1px solid var(--line);text-align:center;background:#fff;font-size:13px;}
-    tbody tr:nth-child(odd) td{background:#f8fbfd;}
-    td:first-child, th:first-child{text-align:left;font-weight:800;width:140px;}
-    .total-row td{background:var(--yellow)!important;font-weight:800;}
-    .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:10px;margin-bottom:32px;}
-    .trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px;}
-    .chart-card{border:1px solid var(--line);background:#fff;border-radius:8px;padding:14px;min-height:300px;box-shadow:0 2px 8px rgba(15,23,42,.04);}
-    .chart-title{font-weight:800;text-align:center;margin:4px 0 10px;color:#111827;}
-    .chart-unit{text-align:right;color:#64748b;font-size:11px;margin-top:-8px;margin-bottom:6px;}
-    canvas{width:100%;max-height:250px;}
-    .trend-card canvas{max-height:300px;}
-    .factory-box{border:1px solid #cfd9e3;border-radius:8px;padding:14px 16px;background:#f8fbfd;margin:10px 0 22px;}
-    .factory-box-title{font-weight:800;margin-bottom:10px;color:#334155;}
-    .factory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px;}
-    .factory-check{display:flex;align-items:center;gap:7px;border:1px solid #b7c3cf;border-radius:5px;background:white;padding:7px 10px;font-weight:700;font-size:12px;}
-    .factory-check input{margin:0;}
-    .foot{text-align:right;color:#6b7280;font-size:12px;margin-top:14px;}
-    @media(max-width:1100px){.grid,.trend-grid{grid-template-columns:1fr 1fr}.factory-grid{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:900px){.wrap{margin:0;border:0}.grid,.trend-grid{grid-template-columns:1fr}.title{font-size:22px}.controls{gap:12px}.control{width:100%;justify-content:space-between}.factory-grid{grid-template-columns:1fr 1fr}table{font-size:12px;}.content{padding:16px;}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS WIND Global Equipment-Based Productivity Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --navy:#1f4e78;
+  --navy2:#315d84;
+  --bg:#eef2f6;
+  --line:#d7e0ea;
+  --card:#ffffff;
+  --text:#111827;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,'Malgun Gothic',sans-serif;
+}
+.wrap{
+  max-width:1480px;
+  margin:0 auto;
+  background:#fff;
+  min-height:100vh;
+}
+.header{
+  background:var(--navy);
+  color:#fff;
+  padding:28px 28px;
+  text-align:center;
+}
+.header h1{
+  margin:0;
+  font-size:28px;
+  letter-spacing:.5px;
+  font-weight:800;
+}
+.controls{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  padding:16px 24px;
+  border-bottom:1px solid var(--line);
+  background:#f8fafc;
+  flex-wrap:wrap;
+}
+.controls label{
+  font-weight:700;
+  font-size:13px;
+}
+.btn-group{
+  display:inline-flex;
+  border:1px solid #b9c7d6;
+  border-radius:4px;
+  overflow:hidden;
+  background:#fff;
+}
+.btn-group button{
+  min-width:72px;
+  padding:8px 16px;
+  border:0;
+  background:#fff;
+  cursor:pointer;
+  font-weight:700;
+}
+.btn-group button.active{
+  background:var(--navy);
+  color:#fff;
+}
+select{
+  min-width:96px;
+  padding:8px 12px;
+  border:1px solid #b9c7d6;
+  border-radius:4px;
+  background:#fff;
+  font-weight:700;
+}
+.content{
+  padding:18px 24px 40px;
+}
+.section-title{
+  background:var(--navy);
+  color:#fff;
+  padding:12px 16px;
+  border-radius:5px;
+  font-weight:800;
+  margin:12px 0 16px;
+  font-size:17px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:22px;
+  font-size:12px;
+  background:#fff;
+}
+th{
+  background:var(--navy2);
+  color:#fff;
+  padding:10px 8px;
+  border:1px solid #d9e2ec;
+  text-align:center;
+}
+td{
+  padding:8px;
+  border:1px solid #d9e2ec;
+  text-align:center;
+}
+td:first-child,th:first-child{
+  text-align:left;
+  font-weight:700;
+}
+tfoot td{
+  background:#fff1b8;
+  font-weight:800;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-bottom:28px;
+}
+.chart-card{
+  background:var(--card);
+  border:1px solid #cfd9e5;
+  border-radius:7px;
+  padding:12px 14px;
+  min-height:280px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.chart-title{
+  text-align:center;
+  font-weight:800;
+  margin:4px 0 0;
+  font-size:13px;
+}
+.chart-unit{
+  text-align:right;
+  font-size:10px;
+  color:#475569;
+  margin-bottom:4px;
+}
+.chart-card canvas{
+  width:100%!important;
+  height:220px!important;
+}
+.trend-title{
+  background:var(--navy);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:5px;
+  font-weight:800;
+  margin-top:18px;
+}
+.factory-box{
+  border:1px solid #cfd9e5;
+  background:#f8fafc;
+  border-radius:7px;
+  padding:12px;
+  margin:12px 0 18px;
+}
+.factory-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(160px,1fr));
+  gap:8px;
+}
+.factory-grid label{
+  border:1px solid #89a7c5;
+  border-radius:4px;
+  padding:5px 8px;
+  font-size:12px;
+  background:#fff;
+  font-weight:700;
+}
+.small-note{
+  color:#64748b;
+  font-size:11px;
+  margin-top:6px;
+}
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr;}
+  .factory-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="title">CS WIND Global Equipment-Based Productivity Dashboard</div>
-    <div class="controls">
-      <div class="control">View:
-        <span class="toggle">
-          <button id="btnWeekly" class="active" onclick="setView('weekly')">Weekly</button>
-          <button id="btnMonthly" onclick="setView('monthly')">Monthly</button>
-        </span>
-      </div>
-      <div class="control">Year: <select id="yearSelect" onchange="render()"></select></div>
-      <div class="control" id="periodLabel">Week: <select id="periodSelect" onchange="render()"></select></div>
-    </div>
-    <div class="content">
-      <h2 class="section-title">1. 공장별 장비 현황 (Equipment Inventory)</h2>
-      <div id="equipmentTable"></div>
-      <h2 class="section-title">2. 공장별 생산 실적 (Production Performance)</h2>
-      <div id="productionTable"></div>
-      <h2 class="section-title">3. 장비당 생산 효율성 (Production per Equipment)</h2>
-      <div id="efficiencyTable"></div>
-      <div class="grid">
-        <div class="chart-card"><div class="chart-title">Bending / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="chartBending"></canvas></div>
-        <div class="chart-card"><div class="chart-title">L/W / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="chartLW"></canvas></div>
-        <div class="chart-card"><div class="chart-title">C/W / Machine</div><div class="chart-unit">(CS Joint / Machine)</div><canvas id="chartCW"></canvas></div>
-        <div class="chart-card"><div class="chart-title">BT GT / Growing Line</div><div class="chart-unit">(BT Sec / Line)</div><canvas id="chartBT"></canvas></div>
-        <div class="chart-card"><div class="chart-title">WT GT / Paint Booth</div><div class="chart-unit">(WT Sec / Booth)</div><canvas id="chartWTBooth"></canvas></div>
-        <div class="chart-card"><div class="chart-title">WT GT / Paint Line</div><div class="chart-unit">(WT Sec / Line)</div><canvas id="chartWTLine"></canvas></div>
-      </div>
-
-      <h2 class="section-title">Trend of Equipment-Based Productivity (최근 10주)</h2>
-      <div class="factory-box">
-        <div class="factory-box-title">공장 선택 (Factory Selection)</div>
-        <div id="factoryChecks" class="factory-grid"></div>
-      </div>
-      <div class="trend-grid">
-        <div class="chart-card trend-card"><div class="chart-title">Bending / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="trendBending"></canvas></div>
-        <div class="chart-card trend-card"><div class="chart-title">L/W / Machine</div><div class="chart-unit">(Can / Machine)</div><canvas id="trendLW"></canvas></div>
-        <div class="chart-card trend-card"><div class="chart-title">C/W / Machine</div><div class="chart-unit">(CS Joint / Machine)</div><canvas id="trendCW"></canvas></div>
-        <div class="chart-card trend-card"><div class="chart-title">BT GT / Growing Line</div><div class="chart-unit">(BT Sec / Line)</div><canvas id="trendBT"></canvas></div>
-        <div class="chart-card trend-card"><div class="chart-title">WT GT / Paint Booth</div><div class="chart-unit">(WT Sec / Booth)</div><canvas id="trendWTBooth"></canvas></div>
-        <div class="chart-card trend-card"><div class="chart-title">WT GT / Paint Line</div><div class="chart-unit">(WT Sec / Line)</div><canvas id="trendWTLine"></canvas></div>
-      </div>
-      <div class="foot">Made by SJ Lee</div>
-    </div>
+<div class="wrap">
+  <div class="header">
+    <h1>CS WIND Global Equipment-Based Productivity Dashboard</h1>
   </div>
+
+  <div class="controls">
+    <label>View:</label>
+    <div class="btn-group">
+      <button id="weeklyBtn" onclick="setView('weekly')">Weekly</button>
+      <button id="monthlyBtn" onclick="setView('monthly')">Monthly</button>
+    </div>
+    <label>Year:</label>
+    <select id="yearSelect" onchange="onYearChange()"></select>
+    <label id="periodLabel">Week:</label>
+    <select id="periodSelect" onchange="renderAll()"></select>
+  </div>
+
+  <div class="content">
+    <div class="section-title">1. 공장별 장비 현황 (Equipment Inventory)</div>
+    <div id="machineTable"></div>
+
+    <div class="section-title">2. 공장별 생산 실적 (Production Performance)</div>
+    <div id="performanceTable"></div>
+
+    <div class="section-title">3. 장비당 생산 효율성 (Production per Equipment)</div>
+    <div class="grid" id="barCharts"></div>
+
+    <div class="trend-title">Trend of Equipment-Based Productivity (최근 10주)</div>
+    <div class="factory-box">
+      <b>공장 선택 (Factory Selection)</b>
+      <div class="factory-grid" id="factoryChecks"></div>
+      <div class="small-note">체크한 공장만 하단 Trend 라인그래프에 표시됩니다.</div>
+    </div>
+    <div class="grid" id="trendCharts"></div>
+  </div>
+</div>
 
 <script>
 %%RAWDATA_PLACEHOLDER%%
 
-let currentView = 'weekly';
-let charts = {};
-const factoryOrder = ['VN #1','VN #2','TW','CN','TR #1','TR #2','AM','PT On','PT Off','CS Total'];
-const factoryColors = {
-  'VN #1':'#4263eb','VN #2':'#4dabf7','TW':'#2b8a7e','CN':'#e03131','TR #1':'#ff922b','TR #2':'#845ef7','AM':'#15aabf','PT On':'#495057','PT Off':'#212529','CS Total':'#111827'
-};
-const equipmentCols = [
-  ['bending','Roll Bending Machine'],['lw','L/W Machine'],['cw','C/W Machine'],['growing','Growing Line'],['paintBooth','Paint Booth'],['paintLine','Paint Line']
+let currentView='weekly';
+let chartObjects=[];
+
+const metricDefs=[
+  {key:'bending',title:'Bending / Machine',unit:'Can / Machine',num:'bending',den:'bending'},
+  {key:'lw',title:'L/W / Machine',unit:'Can / Machine',num:'lw',den:'lw'},
+  {key:'cw',title:'C/W / Machine',unit:'CS Joint / Machine',num:'cw',den:'cw'},
+  {key:'btgt',title:'BT GT / Growing Line',unit:'BT Sec / Line',num:'btgt',den:'growing'},
+  {key:'wtbooth',title:'WT GT / Paint Booth',unit:'WT Sec / Booth',num:'wtgt',den:'paintBooth'},
+  {key:'wtline',title:'WT GT / Paint Line',unit:'WT Sec / Line',num:'wtgt',den:'paintLine'}
 ];
-const productionCols = [
-  ['bending','Bending'],['lw','L/W'],['cw','C/W'],['btgt','BT GT'],['wtgt','WT GT']
+
+const equipmentCols=[
+  ['bending','Roll Bending Machine'],
+  ['lw','L/W Machine'],
+  ['cw','C/W Machine'],
+  ['growing','Growing Line'],
+  ['paintBooth','Paint Booth'],
+  ['paintLine','Paint Line']
 ];
-const effCols = [
-  ['bending','Bending / Machine'],['lw','L/W / Machine'],['cw','C/W / Machine'],['bt','BT GT / Growing Line'],['wtb','WT GT / Paint Booth'],['wtl','WT GT / Paint Line']
+
+const productionCols=[
+  ['bending','Bending'],
+  ['lw','L/W'],
+  ['cw','C/W'],
+  ['btgt','BT GT'],
+  ['wtgt','WT GT']
 ];
-const chartMap = [
-  ['chartBending','trendBending','bending'],['chartLW','trendLW','lw'],['chartCW','trendCW','cw'],['chartBT','trendBT','bt'],['chartWTBooth','trendWTBooth','wtb'],['chartWTLine','trendWTLine','wtl']
-];
-function dataset(){ return currentView === 'weekly' ? rawData : monthlyData; }
-function fmt(v){ return Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtInt(v){ return Number(v||0).toLocaleString(undefined,{maximumFractionDigits:0}); }
-function setView(v){
-  currentView=v;
-  document.getElementById('btnWeekly').classList.toggle('active',v==='weekly');
-  document.getElementById('btnMonthly').classList.toggle('active',v==='monthly');
-  document.getElementById('periodLabel').childNodes[0].nodeValue = v==='weekly' ? 'Week: ' : 'Month: ';
-  document.querySelector('.section-title:nth-of-type(4)').textContent = v==='weekly' ? 'Trend of Equipment-Based Productivity (최근 10주)' : 'Trend of Equipment-Based Productivity (최근 10개월)';
-  populateSelectors(true);
-  render();
+
+const palette=['#2563eb','#38bdf8','#0f766e','#dc2626','#f97316','#8b5cf6','#0891b2','#64748b','#111827','#84cc16'];
+
+function fmt(n,d=2){
+  const v=Number(n||0);
+  return v.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
 }
-function populateSelectors(resetPeriod=false){
-  const data=dataset();
-  const ySel=document.getElementById('yearSelect');
-  const pSel=document.getElementById('periodSelect');
-  const oldY=ySel.value;
-  ySel.innerHTML='';
-  const years=Object.keys(data).sort();
-  years.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;ySel.appendChild(o);});
-  if(oldY && years.includes(oldY)) ySel.value=oldY; else ySel.value=years[years.length-1]||'';
-  const periods=sortedPeriods(data[ySel.value]||{});
-  const oldP=pSel.value;
-  pSel.innerHTML='';
-  periods.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=pSelText(p);pSel.appendChild(o);});
-  if(!resetPeriod && oldP && periods.includes(oldP)) pSel.value=oldP; else pSel.value=periods[periods.length-1]||'';
+
+function valueFor(factory,metric,data){
+  const p=data.production[factory]||{};
+  const e=data.equipment[factory]||{};
+  const den=Number(e[metric.den]||0);
+  return den ? Number(p[metric.num]||0)/den : 0;
 }
-function pSelText(p){ return p; }
-function sortedPeriods(yearObj){
-  const ps=Object.keys(yearObj||{});
-  return ps.sort((a,b)=>{
-    if(currentView==='weekly') return parseInt(a.replace('WK',''))-parseInt(b.replace('WK',''));
-    const ma=a.match(/^(\d{4})-([A-Za-z]{3})$/), mb=b.match(/^(\d{4})-([A-Za-z]{3})$/);
-    const m={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
-    if(ma&&mb) return (parseInt(ma[1])*100+m[ma[2]])-(parseInt(mb[1])*100+m[mb[2]]);
-    return a.localeCompare(b);
+
+function getFactories(data){
+  return Object.keys(data.equipment||{});
+}
+
+function getData(){
+  const y=document.getElementById('yearSelect').value;
+  const p=document.getElementById('periodSelect').value;
+  const src=currentView==='weekly'?rawData:monthlyData;
+  return (src[y]&&src[y][p])?src[y][p]:null;
+}
+
+function destroyCharts(){
+  chartObjects.forEach(c=>c.destroy());
+  chartObjects=[];
+}
+
+function makeChart(canvas,config){
+  const c=new Chart(canvas,config);
+  chartObjects.push(c);
+  return c;
+}
+
+function setView(view){
+  currentView=view;
+  document.getElementById('weeklyBtn').classList.toggle('active',view==='weekly');
+  document.getElementById('monthlyBtn').classList.toggle('active',view==='monthly');
+  document.getElementById('periodLabel').textContent=view==='weekly'?'Week:':'Month:';
+  populatePeriods();
+  renderAll();
+}
+
+function populateYears(){
+  const years=Object.keys(rawData||{}).sort();
+  const sel=document.getElementById('yearSelect');
+  sel.innerHTML='';
+  years.forEach(y=>{
+    const o=document.createElement('option');
+    o.value=y;
+    o.textContent=y;
+    sel.appendChild(o);
+  });
+  if(years.length){sel.value=years[years.length-1];}
+}
+
+function findLastNonZeroPeriod(src,year){
+  const periods=Object.keys(src[year]||{});
+  let last=periods[periods.length-1]||'';
+  for(let i=periods.length-1;i>=0;i--){
+    const d=src[year][periods[i]];
+    const total=Object.values(d.production||{}).reduce((s,row)=>s+Object.values(row).reduce((a,b)=>a+Number(b||0),0),0);
+    if(total>0){return periods[i];}
+  }
+  return last;
+}
+
+function populatePeriods(){
+  const y=document.getElementById('yearSelect').value;
+  const src=currentView==='weekly'?rawData:monthlyData;
+  const periods=Object.keys((src&&src[y])?src[y]:{});
+  const sel=document.getElementById('periodSelect');
+  sel.innerHTML='';
+  periods.forEach(p=>{
+    const o=document.createElement('option');
+    o.value=p;
+    o.textContent=p;
+    sel.appendChild(o);
+  });
+  const last=findLastNonZeroPeriod(src,y);
+  if(last){sel.value=last;}
+}
+
+function onYearChange(){
+  populatePeriods();
+  renderAll();
+}
+
+function buildTable(cols,rows,total){
+  let html='<table><thead><tr>';
+  cols.forEach(c=>html+='<th>'+c+'</th>');
+  html+='</tr></thead><tbody>';
+  rows.forEach(r=>{
+    html+='<tr>';
+    r.forEach(c=>html+='<td>'+c+'</td>');
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  if(total&&rows.length){
+    html+='<tfoot><tr><td>CS Total</td>';
+    for(let i=1;i<cols.length-1;i++){
+      let s=0;
+      rows.forEach(r=>s+=Number(String(r[i]).replace(/,/g,''))||0);
+      html+='<td>'+fmt(s,2)+'</td>';
+    }
+    html+='<td></td></tr></tfoot>';
+  }
+  html+='</table>';
+  return html;
+}
+
+function renderTables(data){
+  const factories=getFactories(data);
+  const machineRows=factories.map(f=>[f].concat(equipmentCols.map(([k])=>fmt((data.equipment[f]||{})[k],2))).concat(['']));
+  const machineHeaders=['Factory'].concat(equipmentCols.map(x=>x[1])).concat(['Remark']);
+  document.getElementById('machineTable').innerHTML=buildTable(machineHeaders,machineRows,true);
+
+  const prodRows=factories.map(f=>[f].concat(productionCols.map(([k])=>fmt((data.production[f]||{})[k],2))).concat(['']));
+  const prodHeaders=['Factory'].concat(productionCols.map(x=>x[1])).concat(['Remark']);
+  document.getElementById('performanceTable').innerHTML=buildTable(prodHeaders,prodRows,false);
+}
+
+function renderBarCharts(data){
+  const box=document.getElementById('barCharts');
+  box.innerHTML='';
+  const factories=getFactories(data);
+
+  metricDefs.forEach((m)=>{
+    const card=document.createElement('div');
+    card.className='chart-card';
+    card.innerHTML='<div class="chart-title">'+m.title+'</div><div class="chart-unit">('+m.unit+')</div><canvas></canvas>';
+    box.appendChild(card);
+
+    const vals=factories.map(f=>Number(valueFor(f,m,data).toFixed(2)));
+    const nonzero=vals.filter(v=>v>0);
+    const cs=nonzero.length?Number((nonzero.reduce((a,b)=>a+b,0)/nonzero.length).toFixed(2)):0;
+    const labels=factories.concat(['CS Total']);
+    const allVals=vals.concat([cs]);
+
+    makeChart(card.querySelector('canvas'),{
+      type:'bar',
+      data:{labels:labels,datasets:[{data:allVals,backgroundColor:labels.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{beginAtZero:true,grid:{color:'#e5e7eb'}},x:{grid:{display:false},ticks:{font:{size:10}}}}
+      }
+    });
   });
 }
-function getPeriodData(){ const d=dataset(); return (d[yearSelect.value]||{})[periodSelect.value] || {equipment:{},production:{}}; }
-function calcEff(eq,pr){
-  return {
-    bending: eq.bending?pr.bending/eq.bending:0,
-    lw: eq.lw?pr.lw/eq.lw:0,
-    cw: eq.cw?pr.cw/eq.cw:0,
-    bt: eq.growing?pr.btgt/eq.growing:0,
-    wtb: eq.paintBooth?pr.wtgt/eq.paintBooth:0,
-    wtl: eq.paintLine?pr.wtgt/eq.paintLine:0
-  };
-}
-function factoriesInPeriod(pd){
-  const s=new Set([...Object.keys(pd.equipment||{}),...Object.keys(pd.production||{})]);
-  return factoryOrder.filter(f=>f!=='CS Total' && s.has(f)).concat([...s].filter(f=>!factoryOrder.includes(f)).sort());
-}
-function buildEquipmentTable(pd){
-  let totals={}; equipmentCols.forEach(([k])=>totals[k]=0);
-  let html='<table><thead><tr><th>Factory</th>'+equipmentCols.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Remark</th></tr></thead><tbody>';
-  factoriesInPeriod(pd).forEach(f=>{const eq=pd.equipment[f]||{}; html+=`<tr><td>${f}</td>`+equipmentCols.map(([k])=>{totals[k]+=Number(eq[k]||0);return `<td>${fmt(eq[k])}</td>`;}).join('')+'<td></td></tr>';});
-  html+='<tr class="total-row"><td>CS Total</td>'+equipmentCols.map(([k])=>`<td>${fmt(totals[k])}</td>`).join('')+'<td></td></tr></tbody></table>';
-  equipmentTable.innerHTML=html;
-}
-function buildProductionTable(pd){
-  let totals={}; productionCols.forEach(([k])=>totals[k]=0);
-  let html='<table><thead><tr><th>Factory</th>'+productionCols.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Remark</th></tr></thead><tbody>';
-  factoriesInPeriod(pd).forEach(f=>{const pr=pd.production[f]||{}; html+=`<tr><td>${f}</td>`+productionCols.map(([k])=>{totals[k]+=Number(pr[k]||0);return `<td>${fmtInt(pr[k])}</td>`;}).join('')+'<td></td></tr>';});
-  html+='<tr class="total-row"><td>CS Total</td>'+productionCols.map(([k])=>`<td>${fmtInt(totals[k])}</td>`).join('')+'<td></td></tr></tbody></table>';
-  productionTable.innerHTML=html;
-}
-function buildEfficiencyTable(pd){
-  let html='<table><thead><tr><th>Factory</th>'+effCols.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Remark</th></tr></thead><tbody>';
-  const totalEq={bending:0,lw:0,cw:0,growing:0,paintBooth:0,paintLine:0};
-  const totalPr={bending:0,lw:0,cw:0,btgt:0,wtgt:0};
-  factoriesInPeriod(pd).forEach(f=>{const eq=pd.equipment[f]||{}; const pr=pd.production[f]||{}; Object.keys(totalEq).forEach(k=>totalEq[k]+=Number(eq[k]||0)); Object.keys(totalPr).forEach(k=>totalPr[k]+=Number(pr[k]||0)); const e=calcEff(eq,pr); html+=`<tr><td>${f}</td>`+effCols.map(([k])=>`<td>${fmt(e[k])}</td>`).join('')+'<td></td></tr>';});
-  const t=calcEff(totalEq,totalPr); html+='<tr class="total-row"><td>CS Total</td>'+effCols.map(([k])=>`<td>${fmt(t[k])}</td>`).join('')+'<td></td></tr></tbody></table>';
-  efficiencyTable.innerHTML=html;
-}
-function periodTotals(pd){
-  const totalEq={bending:0,lw:0,cw:0,growing:0,paintBooth:0,paintLine:0};
-  const totalPr={bending:0,lw:0,cw:0,btgt:0,wtgt:0};
-  factoriesInPeriod(pd).forEach(f=>{const eq=pd.equipment[f]||{}; const pr=pd.production[f]||{}; Object.keys(totalEq).forEach(k=>totalEq[k]+=Number(eq[k]||0)); Object.keys(totalPr).forEach(k=>totalPr[k]+=Number(pr[k]||0));});
-  return {eq:totalEq,pr:totalPr};
-}
-function effForFactory(pd,f,key){
-  if(f==='CS Total'){
-    const t=periodTotals(pd);
-    return calcEff(t.eq,t.pr)[key]||0;
-  }
-  const eq=(pd.equipment||{})[f]||{}; const pr=(pd.production||{})[f]||{};
-  return calcEff(eq,pr)[key]||0;
-}
-function chartData(pd,key){
-  const labels=factoriesInPeriod(pd).concat(['CS Total']);
-  const values=labels.map(f=>effForFactory(pd,f,key));
-  return {labels,values};
-}
-function drawChart(id,key){
-  const ctx=document.getElementById(id); if(charts[id]) charts[id].destroy(); const cd=chartData(getPeriodData(),key);
-  charts[id]=new Chart(ctx,{type:'bar',data:{labels:cd.labels,datasets:[{label:key,data:cd.values,backgroundColor:cd.labels.map(l=>factoryColors[l]||'#6b7280'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#e5e7eb'}}}});
-}
-function allFactoriesInYear(){
-  const y=yearSelect.value; const data=dataset()[y]||{}; const s=new Set();
-  Object.values(data).forEach(pd=>{Object.keys(pd.equipment||{}).forEach(f=>s.add(f));Object.keys(pd.production||{}).forEach(f=>s.add(f));});
-  return factoryOrder.filter(f=>f!=='CS Total' && s.has(f)).concat([...s].filter(f=>!factoryOrder.includes(f)).sort()).concat(['CS Total']);
-}
-function buildFactoryChecks(){
+
+function renderFactoryChecks(){
+  const data=getData();
+  if(!data){return;}
+  const factories=getFactories(data).concat(['CS Total']);
   const box=document.getElementById('factoryChecks');
-  const current=[...box.querySelectorAll('input:checked')].map(i=>i.value);
-  const fs=allFactoriesInYear();
-  box.innerHTML=fs.map(f=>`<label class="factory-check"><input type="checkbox" value="${f}" ${current.length===0||current.includes(f)?'checked':''} onchange="drawTrendCharts()"><span style="color:${factoryColors[f]||'#374151'}">${f}</span></label>`).join('');
+  if(box.children.length){return;}
+  factories.forEach(f=>{
+    const label=document.createElement('label');
+    label.innerHTML='<input type="checkbox" value="'+f+'" checked onchange="renderTrendCharts()"> '+f;
+    box.appendChild(label);
+  });
 }
+
 function selectedFactories(){
-  return [...document.querySelectorAll('#factoryChecks input:checked')].map(i=>i.value);
+  return Array.from(document.querySelectorAll('#factoryChecks input:checked')).map(i=>i.value);
 }
-function recentPeriods(){
-  const y=yearSelect.value; const periods=sortedPeriods(dataset()[y]||{}); const selected=periodSelect.value;
-  let idx=periods.indexOf(selected); if(idx<0) idx=periods.length-1;
-  return periods.slice(Math.max(0,idx-9),idx+1);
+
+function recentWeeks(){
+  const y=document.getElementById('yearSelect').value;
+  const weeks=Object.keys(rawData[y]||{});
+  const cur=document.getElementById('periodSelect').value;
+  let idx=weeks.indexOf(cur);
+  if(idx<0){idx=weeks.length-1;}
+  return weeks.slice(Math.max(0,idx-9),idx+1);
 }
-function drawTrendChart(id,key){
-  const ctx=document.getElementById(id); if(charts[id]) charts[id].destroy();
-  const y=yearSelect.value; const d=dataset()[y]||{}; const ps=recentPeriods(); const fs=selectedFactories();
-  const datasets=fs.map(f=>({label:f,data:ps.map(p=>effForFactory(d[p]||{equipment:{},production:{}},f,key)),borderColor:factoryColors[f]||'#6b7280',backgroundColor:factoryColors[f]||'#6b7280',tension:.25,pointRadius:2,borderWidth:f==='CS Total'?3:2,fill:false}));
-  charts[id]=new Chart(ctx,{type:'line',data:{labels:ps,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{y:{beginAtZero:true,grid:{color:'#e5e7eb'}},x:{grid:{display:false}}}});
+
+function renderTrendCharts(){
+  const box=document.getElementById('trendCharts');
+  box.innerHTML='';
+  const y=document.getElementById('yearSelect').value;
+  const weeks=recentWeeks();
+  const selected=selectedFactories();
+
+  metricDefs.forEach((m)=>{
+    const card=document.createElement('div');
+    card.className='chart-card';
+    card.innerHTML='<div class="chart-title">'+m.title+'</div><div class="chart-unit">('+m.unit+')</div><canvas></canvas>';
+    box.appendChild(card);
+
+    const datasets=selected.map((f,i)=>{
+      const values=weeks.map(w=>{
+        const d=rawData[y]&&rawData[y][w]?rawData[y][w]:null;
+        if(!d){return 0;}
+        if(f==='CS Total'){
+          const facs=getFactories(d);
+          const vals=facs.map(ff=>valueFor(ff,m,d)).filter(v=>v>0);
+          return vals.length?Number((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2)):0;
+        }
+        return Number(valueFor(f,m,d).toFixed(2));
+      });
+      return {label:f,data:values,borderColor:palette[i%palette.length],backgroundColor:palette[i%palette.length],tension:.25,pointRadius:2,fill:false};
+    });
+
+    makeChart(card.querySelector('canvas'),{
+      type:'line',
+      data:{labels:weeks,datasets:datasets},
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
+        scales:{y:{beginAtZero:true,grid:{color:'#e5e7eb'}},x:{grid:{display:false},ticks:{font:{size:10}}}}
+      }
+    });
+  });
 }
-function drawTrendCharts(){
-  chartMap.forEach(([,trendId,key])=>drawTrendChart(trendId,key));
+
+function renderAll(){
+  destroyCharts();
+  const data=getData();
+  if(!data){
+    document.getElementById('machineTable').innerHTML='<p>No data.</p>';
+    document.getElementById('performanceTable').innerHTML='<p>No data.</p>';
+    document.getElementById('barCharts').innerHTML='';
+    document.getElementById('trendCharts').innerHTML='';
+    return;
+  }
+  renderTables(data);
+  renderBarCharts(data);
+  renderFactoryChecks();
+  renderTrendCharts();
 }
-function render(){
-  populateSelectors(false);
-  const pd=getPeriodData();
-  buildEquipmentTable(pd); buildProductionTable(pd); buildEfficiencyTable(pd);
-  chartMap.forEach(([barId,,key])=>drawChart(barId,key));
-  buildFactoryChecks(); drawTrendCharts();
-}
-populateSelectors(true); render();
+
+populateYears();
+setView('weekly');
 </script>
 </body>
 </html>
